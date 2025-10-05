@@ -15,6 +15,7 @@ return new class extends Migration
         $table->id();
         $table->unsignedBigInteger('order_id');
         $table->string('item_id'); // matches menu_items.item_id
+        $table->string('item_name'); // ✅ Add this column
         $table->integer('quantity');
         $table->decimal('subtotal', 8, 2);
         $table->timestamps();
@@ -26,6 +27,7 @@ return new class extends Migration
         $table->foreign('item_id')->references('item_id')->on('menu_items')->onDelete('cascade');
     });
 }
+
 
     /**
      * Reverse the migrations.

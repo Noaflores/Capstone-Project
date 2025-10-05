@@ -6,6 +6,12 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\MenuController; 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StaffOrderController;
+
+
+Route::middleware(['auth', 'role:staff'])->group(function () {
+    Route::get('/staff/orders', [StaffOrderController::class, 'index'])->name('staff.orders');
+});
 
 Route::resource('users', UserController::class);
 
@@ -17,7 +23,7 @@ Route::get('/', function () {
 
 Route::get('/homepage', function () {
     return view('homepage');
-})->middleware(['auth', 'verified'])->name('homepage');
+})->middleware(['auth', 'role:manager', 'verified'])->name('homepage');
 
 // ✅ Protected routes
 Route::middleware('auth')->group(function () {

@@ -1,5 +1,5 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
-import forms from '@tailwindcss/forms';
+import defaultTheme from 'tailwindcss/defaultTheme'
+import forms from '@tailwindcss/forms'
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -9,19 +9,16 @@ export default {
         './resources/views/**/*.blade.php',
     ],
 
-    safelist: [
-        'bg-red-500',
-        'inline-flex',
-        'hover:bg-red-600', // optional: keep hover style too
-    ],
-
     theme: {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'custom-green': '#A0C878',
+            },
         },
     },
 
     plugins: [forms],
-};
+}
