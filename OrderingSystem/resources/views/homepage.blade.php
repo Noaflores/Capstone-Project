@@ -4,7 +4,7 @@
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-12 min-h-[500px]">
                 
                 <!-- Welcome message centered -->
-                <h1 class="text-4xl font-bold text-center mb-12">Welcome Manager!</h1>
+                <h1 class="text-4xl font-bold text-center mb-12">Welcome to Homepage!</h1>
 
                 <!-- Action buttons centered + stacked vertically -->
                 <div class="flex flex-col items-center space-y-6">
