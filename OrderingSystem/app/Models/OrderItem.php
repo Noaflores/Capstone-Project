@@ -21,4 +21,15 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function getFormattedItemIdAttribute()
+    {
+    return 'I' . str_pad($this->id, 3, '0', STR_PAD_LEFT);
+    }
+
+    public function getFormattedOrderIdAttribute()
+    {
+    return 'ORD' . str_pad($this->order->id ?? 0, 2, '0', STR_PAD_LEFT);
+    }
+
 }
