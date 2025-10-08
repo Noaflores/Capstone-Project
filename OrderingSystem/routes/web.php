@@ -11,8 +11,10 @@ use App\Http\Controllers\StaffOrderController;
 // STAFF ROUTES
 Route::middleware(['auth', 'role:staff'])->group(function () {
     Route::get('/staff/orders', [StaffOrderController::class, 'index'])->name('staff.orders');
-    Route::get('/staff/orders/{id}/edit-status', [StaffOrderController::class, 'editStatus'])->name('staff.orders.editStatus');
+    Route::get('/staff/orders/{id}/edit-status', [StaffOrderController::class, 'editStatus'])->name('staff.orders.editStatus');    
     Route::put('/staff/orders/{id}/update-status', [StaffOrderController::class, 'updateStatus'])->name('staff.orders.updateStatus');
+    Route::delete('/staff/orders/{id}/finish', [StaffOrderController::class, 'finish'])->name('staff.orders.finish');
+
 });
 
 // MANAGER ROUTES
