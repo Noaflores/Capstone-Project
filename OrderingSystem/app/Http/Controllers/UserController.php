@@ -24,26 +24,16 @@ class UserController extends Controller
 
     // Update user
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255', // DB column is "name", not "username"
-            'email' => 'required|email|unique:users,email,'.$id,
-            'contact_number' => 'nullable|string|max:15',
-            'password' => 'nullable|string|min:6|confirmed',
-        ]);
+{
+    
+    $user = User::findOrFail($id);
+    $user->update($request->only(['name', 'email', 'contact_number']));
 
-        $user = User::findOrFail($id);
+    // Redirect back to Manager User page
+    return redirect()->route('users.index')->with('success', 'User updated successfully.');
+}
 
-        $data = $request->only(['name','email','contact_number']);
 
-        if ($request->filled('password')) {
-            $data['password'] = bcrypt($request->password);
-        }
-
-        $user->update($data);
-
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
-    }
 
     // Delete user
     public function destroy($id)
