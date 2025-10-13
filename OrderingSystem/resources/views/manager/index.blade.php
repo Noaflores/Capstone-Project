@@ -1,4 +1,5 @@
 <x-app-layout>
+    @section('title', 'Account Manage')
     <div class="py-12">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-8">
