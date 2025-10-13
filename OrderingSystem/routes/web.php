@@ -17,8 +17,9 @@ Route::get('/', function () {
 
 // MANAGER ROUTES
 Route::middleware(['auth', 'role:manager'])->group(function () {
+
+    // Dashboard
     Route::get('/homepage', fn() => view('homepage'))->name('homepage');
-    Route::resource('users', UserController::class);
 
     // User management
     Route::resource('users', UserController::class);
@@ -26,7 +27,6 @@ Route::middleware(['auth', 'role:manager'])->group(function () {
     // Menu management
     Route::get('/menu/manage', [MenuController::class, 'index'])->name('menu.manage');
     Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-    Route::get('/menu/edit', [MenuController::class, 'edit'])->name('menu.edit');
     Route::get('/menu/create', fn() => view('manager.create-menu'))->name('menu.create');
     Route::post('/menu/store', [MenuController::class, 'store'])->name('menu.store');
     Route::get('/menu/{id}/edit', [MenuController::class, 'editItem'])->name('menu.editItem');
@@ -35,6 +35,7 @@ Route::middleware(['auth', 'role:manager'])->group(function () {
 
     // Reports
     Route::get('/reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
+    Route::get('/reports/sales/pdf', [SalesReportController::class, 'downloadPDF'])->name('reports.sales.pdf');
 });
 
 // STAFF ROUTES

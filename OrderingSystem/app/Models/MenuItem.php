@@ -2,21 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class MenuItem extends Model
 {
-    protected $primaryKey = 'item_id';   // since your PK is item_id
-    public $incrementing = false;        // because item_id is a string like M001
+    use HasFactory;
+
+    protected $primaryKey = 'item_id';
+    public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'item_id', 'name', 'description', 'image', 'price',
+        'item_id',
+        'name',
+        'description',
+        'price',
+        'image',
     ];
 
-    // ✅ Relationship to order_items
     public function orders()
     {
         return $this->hasMany(OrderItem::class, 'item_id', 'item_id');
     }
 }
+
+
