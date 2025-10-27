@@ -16,7 +16,7 @@ $this->call([
     MenuItemsSeeder::class,
     UsersTableSeeder::class,
     OrdersTableSeeder::class,
-    OrderItemsTableSeeder::class,
+    //OrderItemsTableSeeder::class,
 ]);
 
     }
