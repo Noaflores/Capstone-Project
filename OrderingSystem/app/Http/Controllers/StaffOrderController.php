@@ -85,4 +85,20 @@ class StaffOrderController extends Controller
                      ->with('success', 'Order marked as finished and removed successfully.');
 }
 
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'customer_id' => 'required|integer',
+        'item_name' => 'required|string',
+        'quantity' => 'required|integer|min:1',
+        'price' => 'required|numeric|min:0',
+    ]);
+
+    $validated['total'] = $validated['quantity'] * $validated['price'];
+
+    Order::create($validated);
+
+    return redirect()->back()->with('success', 'Order recorded successfully!');
+}
+
 }
