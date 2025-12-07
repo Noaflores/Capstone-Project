@@ -10,14 +10,15 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
-    {
-$this->call([
-    MenuItemsSeeder::class,
-    UsersTableSeeder::class,
-    OrdersTableSeeder::class,
-    //OrderItemsTableSeeder::class,
-]);
+   public function run(): void
+{
+    $this->call([
+        UsersTableSeeder::class,
+        MenuItemsSeeder::class,
+        //OrdersTableSeeder::class,
+        OrderItemsSeeder::class, 
+    ]);
+}
 
-    }
+
 }

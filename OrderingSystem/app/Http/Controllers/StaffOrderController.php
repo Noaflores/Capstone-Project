@@ -15,9 +15,17 @@ class StaffOrderController extends Controller
      */
     public function index()
 {
-    $orders = OrderItem::with('order')
-        ->selectRaw('order_id, SUM(subtotal) as total, MAX(created_at) as created_at, MAX(status) as status')
-        ->groupBy('order_id')
+    $orders = \DB::table('order_items')
+        ->join('orders', 'order_items.order_id', '=', 'orders.id')
+        ->join('menu_items', 'order_items.item_id', '=', 'menu_items.item_id')
+        ->select(
+            'order_items.order_id',
+            \DB::raw('SUM(order_items.quantity * menu_items.price) as total'),
+            \DB::raw('MAX(order_items.created_at) as created_at'),
+            \DB::raw('MAX(order_items.status) as status')
+        )
+        ->groupBy('order_items.order_id')
+        ->whereNotNull('orders.customer_id') // Only show orders made by real customers
         ->get();
 
     return view('staffs.orders', compact('orders'));

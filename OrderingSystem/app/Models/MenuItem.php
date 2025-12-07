@@ -26,5 +26,3 @@ class MenuItem extends Model
         return $this->hasMany(OrderItem::class, 'item_id', 'item_id');
     }
 }
-
-

@@ -24,25 +24,28 @@ Route::middleware(['auth', 'role:manager'])->group(function () {
     // User management
     Route::resource('users', UserController::class);
 
-    // Menu management
-    Route::get('/menu/manage', [MenuController::class, 'index'])->name('menu.manage');
-    Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-    Route::get('/menu/create', fn() => view('manager.create-menu'))->name('menu.create');
-    Route::post('/menu/store', [MenuController::class, 'store'])->name('menu.store');
-    Route::get('/menu/{id}/edit', [MenuController::class, 'editItem'])->name('menu.editItem');
-    Route::put('/menu/{id}', [MenuController::class, 'update'])->name('menu.update');
-    Route::delete('/menu/{id}', [MenuController::class, 'destroy'])->name('menu.destroy');
+    // Menu management (replace your old menu routes with this block)
+    Route::prefix('menu')->name('menu.')->group(function () {
+        Route::get('/', [MenuController::class, 'index'])->name('index');
+        Route::get('/manage', [MenuController::class, 'index'])->name('manage');
+        Route::get('/create', [MenuController::class, 'create'])->name('create');
+        Route::post('/store', [MenuController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [MenuController::class, 'editItem'])->name('editItem');
+        Route::put('/{id}', [MenuController::class, 'update'])->name('update');
+        Route::delete('/{id}', [MenuController::class, 'destroy'])->name('destroy');
+    });
 
     // Reports
     Route::get('/reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
     Route::get('/reports/sales/pdf', [SalesReportController::class, 'downloadPDF'])->name('reports.sales.pdf');
 });
 
+
 // STAFF ROUTES
 Route::middleware(['auth', 'role:staff'])->group(function () {
     Route::get('/staff/orders', [StaffOrderController::class, 'index'])->name('staff.orders');
     Route::get('/staff/orders/{id}/edit-status', [StaffOrderController::class, 'editStatus'])->name('staff.orders.editStatus');
-    Route::put('/staff/orders/{id}/update-status', [StaffOrderController::class, 'updateStatus'])->name('staff.orders.updateStatus');
+    Route::put('staff/orders/{id}/update-status', [StaffOrderController::class, 'updateStatus'])->name('staff.orders.updateStatus');
     Route::delete('/staff/orders/{id}/finish', [StaffOrderController::class, 'finish'])->name('staff.orders.finish');
 });
 
