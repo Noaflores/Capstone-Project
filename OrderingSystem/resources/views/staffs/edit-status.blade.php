@@ -23,7 +23,7 @@
                             <tr>
                                 <td class="border px-2 py-1">{{ $item->item_name }}</td>
                                 <td class="border px-2 py-1 text-center">{{ $item->quantity }}</td>
-                                <td class="border px-2 py-1 text-right">₱{{ number_format($item->subtotal, 2) }}</td>
+                                <td class="border px-2 py-1 text-right">₱{{ number_format($item->quantity * $item->price, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -35,7 +35,7 @@
             </div>
 
             <!-- 🔧 Status Edit Form -->
-<form method="POST" action="{{ route('staff.orders.updateStatus', $orderItem->id) }}">
+<form method="POST" action="{{ route('staff.orders.updateStatus', $orderItem->order_id) }}">
     @csrf
     @method('PUT')
 

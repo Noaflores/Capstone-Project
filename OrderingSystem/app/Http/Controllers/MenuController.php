@@ -54,7 +54,7 @@ class MenuController extends Controller
         'image' => $imagePath,
     ]);
 
-    return redirect()->route('menu.edit')->with('success', 'Menu item created successfully!');
+    return redirect()->route('menu.manage')->with('success', 'Menu item created successfully!');
 }
 
 
@@ -110,7 +110,7 @@ class MenuController extends Controller
         'image' => $item->image,
     ]);
 
-    return redirect()->route('menu.edit')->with('success', 'Menu item updated successfully.');
+    return redirect()->route('menu.manage')->with('success', 'Menu item updated successfully.');
 }
 
 
@@ -121,13 +121,13 @@ class MenuController extends Controller
         $exists = DB::table('order_items')->where('item_id', $item_id)->exists();
 
         if ($exists) {
-            return redirect()->route('menu.edit')
+            return redirect()->route('menu.manage')
                 ->with('error', 'This item cannot be deleted because it is already used in an order.');
         }
 
         DB::table('menu_items')->where('item_id', $item_id)->delete();
 
-        return redirect()->route('menu.edit')
+        return redirect()->route('menu.manage')
             ->with('success', 'Menu item deleted successfully.');
     }
 }

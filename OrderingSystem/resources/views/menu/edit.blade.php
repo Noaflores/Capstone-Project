@@ -9,7 +9,7 @@
 
                 <!-- Back button -->
                 <div class="mb-4">
-                    <a href="{{ route('menu.edit') }}" 
+                    <a href="{{ route('menu.manage') }}"
                        class="inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                         ← Back to Menu List
                     </a>
