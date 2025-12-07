@@ -14,6 +14,7 @@ IMPORTANT MESSAGE AFTER DOWNLOADING THE MANAGER AND STAFF SYSTEM:
 > You can find the caffe_db SQL Source file here:
 > /OrderingSystem/database/caffe_db
 > (P.S Look for it on your file explorer.)
+>
 > After finding the file, open your phpMyAdmin then go to "Import" section and select the caffe_db file from this folder. 
 > After you have selected the caffe_db file click the import button from Import section and data will be added to your phpMyAdmin.
 > ````
