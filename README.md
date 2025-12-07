@@ -1,4 +1,23 @@
 IMPORTANT MESSAGE AFTER DOWNLOADING THE MANAGER AND STAFF SYSTEM:
+## IMPORTING of "caffe_db" - On your PC:
+> Check your .env if the setup is like this:
+> ````
+> DB_CONNECTION=mysql
+> DB_HOST=127.0.0.1
+> DB_PORT=3306
+> DB_DATABASE=caffe_db
+> DB_USERNAME=root
+> DB_PASSWORD=
+> ````
+> Also import the SQL Source file on your phpMyAdmin
+> ````
+> You can find the caffe_db SQL Source file here:
+> /OrderingSystem/database/caffe_db
+> (P.S Look for it on your file explorer.)
+> After finding the file, open your phpMyAdmin then go to "Import" section and select the caffe_db file from this folder. 
+> After you have selected the caffe_db file click the import button from Import section and data will be added to your phpMyAdmin.
+> ````
+
 ## STEP 1 — Install Node.js
 
 > **If you don’t have Node.js:**
@@ -206,12 +225,12 @@ Add this to .gitignore:
 If your .env file already exists but doesn’t include database settings,
 add the following lines right below the LOG section:
 ```
-DB_CONNECTION=sqlite
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=database/database.sqlite
-# DB_USERNAME=root
-# DB_PASSWORD=
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=caffe_db
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 ---
 ## P.S If an error like "APP_KEY missing" appeared, 
