@@ -14,8 +14,9 @@
                 <table class="w-full border border-gray-300 rounded-lg shadow-sm">
                     <thead>
                         <tr class="bg-gray-100">
-                            <th class="px-4 py-2 border text-left">Item ID</th>
+                            <th class="px-4 py-2 border text-left">ID</th>
                             <th class="px-4 py-2 border text-left">Name</th>
+                            <th class="px-4 py-2 border text-left">Sub Category ID</th>
                             <th class="px-4 py-2 border text-left">Price</th>
                             <th class="px-4 py-2 border text-left">Description</th>
                             <th class="px-4 py-2 border text-left">Actions</th>
@@ -24,21 +25,22 @@
                     <tbody>
                         @forelse ($menuItems as $item)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 border">{{ $item->item_id }}</td>
+                                <td class="px-4 py-2 border">{{ $item->id }}</td>
                                 <td class="px-4 py-2 border">{{ $item->name }}</td>
-                                <td class="px-4 py-2 border">₱{{ number_format($item->price, 2) }}</td>
+                                <td class="px-4 py-2 border">{{ $item->sub_category_id }}</td>
+                                <td class="px-4 py-2 border">{{ number_format($item->price, 2) }}</td>
                                 <td class="px-4 py-2 border">{{ $item->description }}</td>
                                 <td class="px-4 py-2 border">
-    <div class="flex justify-center items-center gap-2">
+        <div class="flex justify-center items-center gap-2">
         <!-- Edit button -->
-        <a href="{{ route('menu.editItem', $item->item_id) }}"
+        <a href="{{ route('menu.editItem', $item->id) }}"
            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Edit
         </a>
 
         <!-- Remove button -->
         @if ($item->order_count == 0)
-            <form action="{{ route('menu.destroy', $item->item_id) }}" method="POST" 
+            <form action="{{ route('menu.destroy', $item->id) }}" method="POST"
                   onsubmit="return confirm('Are you sure you want to delete this item?');">
                 @csrf
                 @method('DELETE')
