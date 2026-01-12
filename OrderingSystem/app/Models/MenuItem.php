@@ -9,20 +9,24 @@ class MenuItem extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'item_id';
+    protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'item_id',
-        'name',
-        'description',
-        'price',
-        'image',
-    ];
+    'name',
+    'sub_category_id',
+    'description',
+    'price',
+    'image_path',
+    'is_available',
+];
 
+
+    public $timestamps = false;
+    
     public function orders()
     {
-        return $this->hasMany(OrderItem::class, 'item_id', 'item_id');
+        return $this->hasMany(OrderItem::class, 'id', 'id');
     }
 }

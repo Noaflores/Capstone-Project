@@ -16,7 +16,7 @@
                 </div>
 
                 <!-- Edit form -->
-                <form action="{{ route('menu.update', $item->item_id) }}" 
+                <form action="{{ route('menu.update', $item->id) }}" 
                       method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
@@ -26,6 +26,19 @@
                         <input type="text" id="name" name="name" 
                                value="{{ old('name', $item->name) }}"
                                class="w-full border-gray-300 rounded-lg shadow-sm">
+                    </div>
+
+                    <!-- Sub Category ID -->
+                    <div class="mb-4">
+                    <label for="sub_category_id" class="block font-medium">Sub Category ID</label>
+                    <input type="number"
+                    id="sub_category_id"
+                    name="sub_category_id"
+                    min="1000"
+                    max="9999"
+                    value="{{ old('sub_category_id', $item->sub_category_id) }}"
+                    class="w-full border-gray-300 rounded-lg shadow-sm"
+                    placeholder="Enter 4-digit sub-category ID">
                     </div>
 
                     <div class="mb-4">

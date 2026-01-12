@@ -46,6 +46,21 @@
                             </div>
 
                             <div class="mb-4">
+                            <label for="sub_category_id" class="block font-bold mb-2">Sub Category ID</label>
+                            <input type="number"
+                            name="sub_category_id"
+                            id="sub_category_id"
+                            class="w-full border p-2 rounded-md bg-gray-100"
+                            placeholder="Enter 4-digit number"
+                            min="1000"
+                            max="9999"
+                            required>
+                            <p class="text-sm text-gray-500 mt-1">
+                            Example 4-digit IDs: 1742=Hot Beverages, 4217=Cold Beverages, 5023=Coffee, 8931=Tea
+                            </p>
+                            </div>
+    
+                            <div class="mb-4">
                                 <label for="description" class="block font-bold mb-2">Description</label>
                                 <textarea name="description" id="description" rows="5"
                                           class="w-full border p-2 rounded-md bg-gray-100" required></textarea>

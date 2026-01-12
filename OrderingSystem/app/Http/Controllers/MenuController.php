@@ -4,130 +4,124 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use App\Models\MenuItem;
+use App\Models\SubCategory;
 
 class MenuController extends Controller
 {
-    // Show the create form
+    // Show create form
     public function create()
-    {
-        return view('manager.create-menu');
-    }
-
-    // Handle POST /menu/store
-    public function store(Request $request)
 {
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'required|string',
-        'price' => 'required|numeric|min:0',
-        'image' => 'nullable|image|max:2048',
-    ]);
+    $subCategories = SubCategory::all();
 
-    // ✅ Get latest item based on the numeric part of item_id (e.g., IID1008)
-    $latestItem = MenuItem::orderByDesc('item_id')->first();
-
-    if ($latestItem) {
-        // Extract numeric portion from item_id (e.g., from "IID1008" → 1008)
-        $lastNumber = (int) preg_replace('/\D/', '', $latestItem->item_id);
-        $nextNumber = $lastNumber + 1;
-    } else {
-        $nextNumber = 1001; // starting point if no records yet
-    }
-
-    // ✅ Build new item ID
-    $itemId = 'IID' . $nextNumber;
-
-    // ✅ Handle file upload (optional)
-    $imagePath = null;
-    if ($request->hasFile('image')) {
-        $imagePath = $request->file('image')->store('menu_images', 'public');
-    }
-
-    // ✅ Create new menu record
-    MenuItem::create([
-        'item_id' => $itemId,
-        'name' => $request->name,
-        'description' => $request->description,
-        'price' => $request->price,
-        'image' => $imagePath,
-    ]);
-
-    return redirect()->route('menu.manage')->with('success', 'Menu item created successfully!');
+    return view('manager.create-menu', compact('subCategories'));
 }
 
 
-    // Show all menu items (manager/edit-menu.blade.php)
-    public function edit()
+    // Store new menu item
+    public function store(Request $request)
     {
-        $menuItems = MenuItem::all(); 
-        return view('manager.edit-menu', compact('menuItems'));
+        $request->validate([
+            'name'        => 'required|string|max:255',
+            'sub_category_id' => 'required|integer|min:1',
+            'description' => 'required|string',
+            'price'       => 'required|numeric|min:0',
+            'image'       => 'nullable|image|max:2048',
+        ]);
+
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')
+                ->store('menu_images', 'public');
+        }
+
+        MenuItem::create([
+            'name'        => $request->name,
+            'description' => $request->description,
+            'price'       => $request->price,
+            'image_path'  => $imagePath,
+            'is_available'=> true,
+        ]);
+
+        return redirect()
+            ->route('menu.manage')
+            ->with('success', 'Menu item created successfully!');
     }
 
+    // Show all menu items
     public function index()
     {
         $menuItems = MenuItem::all();
         return view('manager.edit-menu', compact('menuItems'));
     }
 
-    // Show the edit form for one item
+    // Show edit form
     public function editItem($id)
     {
         $item = MenuItem::findOrFail($id);
         return view('menu.edit', compact('item'));
     }
 
-    // Handle updating one item
+    // Update menu item
     public function update(Request $request, $id)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'price' => 'required|numeric',
-        'description' => 'nullable|string',
-        'image' => 'nullable|image|max:2048',
-    ]);
+    {
+        $request->validate([
+            'name'        => 'required|string|max:255',
+            'price'       => 'required|numeric',
+            'description' => 'nullable|string',
+            'image'       => 'nullable|image|max:2048',
+        ]);
 
-    $item = MenuItem::findOrFail($id);
+        $item = MenuItem::findOrFail($id);
 
-    // ✅ If a new image is uploaded, store it
-    if ($request->hasFile('image')) {
-        // Delete the old image if it exists
-        if ($item->image && \Storage::disk('public')->exists($item->image)) {
-            \Storage::disk('public')->delete($item->image);
+        // Replace image if uploaded
+        if ($request->hasFile('image')) {
+
+            if ($item->image_path && Storage::disk('public')->exists($item->image_path)) {
+                Storage::disk('public')->delete($item->image_path);
+            }
+
+            $item->image_path = $request->file('image')
+                ->store('menu_images', 'public');
         }
 
-        // Store the new one
-        $imagePath = $request->file('image')->store('menu_images', 'public');
-        $item->image = $imagePath;
+        $item->update([
+            'name'        => $request->name,
+            'price'       => $request->price,
+            'description' => $request->description,
+            'image_path'  => $item->image_path,
+        ]);
+
+        return redirect()
+            ->route('menu.manage')
+            ->with('success', 'Menu item updated successfully.');
     }
 
-    // ✅ Update text fields
-    $item->update([
-        'name' => $request->name,
-        'price' => $request->price,
-        'description' => $request->description,
-        'image' => $item->image,
-    ]);
-
-    return redirect()->route('menu.manage')->with('success', 'Menu item updated successfully.');
-}
-
-
-    // Handle deleting an item
-    public function destroy($item_id)
+    // Delete menu item
+    public function destroy($id)
     {
-        // Check if item is used in order_items
-        $exists = DB::table('order_items')->where('item_id', $item_id)->exists();
+        $exists = DB::table('order_items')
+            ->where('menu_item_id', $id)
+            ->exists();
 
         if ($exists) {
-            return redirect()->route('menu.manage')
+            return redirect()
+                ->route('menu.manage')
                 ->with('error', 'This item cannot be deleted because it is already used in an order.');
         }
 
-        DB::table('menu_items')->where('item_id', $item_id)->delete();
+        $item = MenuItem::findOrFail($id);
 
-        return redirect()->route('menu.manage')
+        if ($item->image_path && Storage::disk('public')->exists($item->image_path)) {
+            Storage::disk('public')->delete($item->image_path);
+        }
+
+        $item->delete();
+
+        return redirect()
+            ->route('menu.manage')
             ->with('success', 'Menu item deleted successfully.');
     }
 }
