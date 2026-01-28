@@ -4,7 +4,7 @@
        <div class="bg-[#A0C878] p-6 pl-10 flex items-center shadow-md">
     <h1 class="text-2xl font-bold text-gray-800">Order Menu Page</h1>
 </div>
-        <!-- ✅ Success Message -->
+        <!-- Success Message -->
         @if (session('success'))
             <div class="mx-6 mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
                 {{ session('success') }}
@@ -34,30 +34,26 @@
                     <tbody>
                         @foreach($orders as $order)
                             <tr class="border-t hover:bg-gray-50">
-                                <td class="px-6 py-3">ORD{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</td>
+                                <td class="px-6 py-3">{{ $order->formatted_order_id }}</td>
                                 <td class="px-6 py-3">₱{{ number_format($order->total, 2) }}</td>
                                 <td class="px-6 py-3">{{ \Carbon\Carbon::parse($order->created_at)->format('Y-m-d') }}</td>
                                 <td class="px-6 py-3">{{ $order->status }}</td>
+
                                 <td class="px-6 py-3 text-center">
     <div class="inline-flex items-center justify-center gap-3">
-        <!-- ✏️ Edit Button -->
+        <!--  Edit Button -->
         <a href="{{ route('staff.orders.editStatus', ['id' => $order->order_id]) }}"
            class="bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition">
             Edit
         </a>
 
-        <!-- ✅ Finish Button -->
-        <form action="{{ route('staff.orders.finish', ['id' => $order->order_id]) }}"
-              method="POST"
-              onsubmit="return confirm('Mark this order as finished? It will be removed from the list.');"
-              class="inline">
-            @csrf
-            @method('DELETE')
-            <button type="submit"
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition">
-                Done
-            </button>
-        </form>
+        <!--  Finish Button -->
+<form action="{{ route('staff.orders.finish', $order->order_id) }}" method="POST">
+    @csrf
+    <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded">
+        Done
+    </button>
+</form>
     </div>
 </td>
                             </tr>

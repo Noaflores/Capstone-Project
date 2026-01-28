@@ -15,17 +15,20 @@ class MenuItem extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'id',   
-        'sub_category_id',
-        'name',
-        'description',
-        'price',
-        'image_path',
-        'is_available',
-    ];
+    'id',   
+    'sub_category_id',
+    'name',
+    'description',
+    'price',
+    'image_path',
+    'is_available',
+    'item_type',  
+];
 
-    public function subCategory()
-    {
-        return $this->belongsTo(SubCategory::class, 'sub_category_id');
-    }
+
+    public function subcategory()
+{
+    return $this->belongsTo(SubCategory::class, 'sub_category_id');
+}
+
 }
