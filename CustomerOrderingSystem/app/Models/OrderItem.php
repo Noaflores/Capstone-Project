@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class OrderItem extends Model
+{
+    use HasFactory;
+
+    protected $primaryKey = 'order_item_id'; // if your table uses order_item_id as PK
+    public $incrementing = false; // if you are using custom IDs
+
+    protected $fillable = [
+        'order_id',
+        'item_id',
+        'item_name',
+        'size',
+        'price',
+        'quantity',
+        'subtotal',
+    ];
+
+    public $timestamps = true;
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id', 'order_id');
+    }
+
+}

@@ -1,95 +1,108 @@
 <x-app-layout>
-    @section('title', 'Edit-menu')
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h1 class="text-2xl font-bold mb-6">Edit Menu Items</h1>
+    @section('title', 'Edit Menu')
 
-                <!-- ✅ Only Create item button on top -->
-                <div class="mode-buttons mb-6">
-                    <a href="{{ route('menu.create') }}" class="action-button">Create item</a>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Edit Menu Items') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+
+                {{-- PAGE TITLE --}}
+                <h1 class="text-2xl font-semibold mb-6">Edit Menu Items</h1>
+
+                {{-- FILTER + SEARCH --}}
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    {{-- CATEGORY FILTER --}}
+                    <form method="GET" action="{{ route('menu.manage') }}" class="flex items-center gap-3">
+                        <label for="type" class="font-semibold">Select Category:</label>
+                        <select name="type"
+                                id="type"
+                                class="border rounded px-3 py-2 w-64"
+                                onchange="this.form.submit()"
+                        >
+                            <option value="">All Categories</option>
+                            <option value="Appetizers" {{ request('type') == 'Appetizers' ? 'selected' : '' }}>Appetizers</option>
+                            <option value="Main Courses" {{ request('type') == 'Main Courses' ? 'selected' : '' }}>Main Courses</option>
+                            <option value="Desserts" {{ request('type') == 'Desserts' ? 'selected' : '' }}>Desserts</option>
+                            <option value="Snacks" {{ request('type') == 'Snacks' ? 'selected' : '' }}>Snacks</option>
+                            <option value="Side Dishes" {{ request('type') == 'Side Dishes' ? 'selected' : '' }}>Side Dishes</option>
+                            <option value="Beverages" {{ request('type') == 'Beverages' ? 'selected' : '' }}>Beverages</option>
+                        </select>
+                    </form>
+
+                    {{-- SEARCH --}}
+                    <form method="GET" action="{{ route('menu.manage') }}" class="flex items-center gap-2">
+                        <input type="text" name="search"
+                               value="{{ request('search') }}"
+                               placeholder="Search menu items..."
+                               class="border rounded px-3 py-2 w-64">
+
+                        <button type="submit"
+                                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Search
+                        </button>
+                    </form>
                 </div>
 
-                <!-- ✅ Table of menu items -->
-                <table class="w-full border border-gray-300 rounded-lg shadow-sm">
+                {{-- MENU TABLE --}}
+                <table class="w-full border-collapse border border-gray-300">
                     <thead>
-                        <tr class="bg-gray-100">
-                            <th class="px-4 py-2 border text-left">ID</th>
-                            <th class="px-4 py-2 border text-left">Name</th>
-                            <th class="px-4 py-2 border text-left">Sub Category ID</th>
-                            <th class="px-4 py-2 border text-left">Price</th>
-                            <th class="px-4 py-2 border text-left">Description</th>
-                            <th class="px-4 py-2 border text-left">Actions</th>
+                        <tr class="bg-gray-200">
+                            <th class="border px-4 py-2">Item ID</th>
+                            <th class="border px-4 py-2">Name</th>
+                            <th class="border px-4 py-2">Category</th>
+                            <th class="border px-4 py-2">Price</th>
+                            <th class="border px-4 py-2">Description</th>
+                            <th class="border px-4 py-2">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse ($menuItems as $item)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 border">{{ $item->id }}</td>
-                                <td class="px-4 py-2 border">{{ $item->name }}</td>
-                                <td class="px-4 py-2 border">{{ $item->sub_category_id }}</td>
-                                <td class="px-4 py-2 border">{{ number_format($item->price, 2) }}</td>
-                                <td class="px-4 py-2 border">{{ $item->description }}</td>
-                                <td class="px-4 py-2 border">
-        <div class="flex justify-center items-center gap-2">
-        <!-- Edit button -->
+                                <td class="border px-4 py-2">{{ $item->sub_category_id }}</td>
+                                <td class="border px-4 py-2">{{ $item->name }}</td>
+                                <td class="border px-4 py-2">{{ $item->item_type }}</td>
+                                <td class="border px-4 py-2">₱{{ number_format($item->price, 2) }}</td>
+                                <td class="border px-4 py-2 truncate" title="{{ $item->description }}">
+                                    {{ $item->description }}
+                                </td>
+                                <td class="border px-4 py-2 text-center">
+    <div class="flex justify-center space-x-2">
         <a href="{{ route('menu.editItem', $item->id) }}"
-           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Edit
+           class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
+           Edit
         </a>
-
-        <!-- Remove button -->
-        @if ($item->order_count == 0)
-            <form action="{{ route('menu.destroy', $item->id) }}" method="POST"
-                  onsubmit="return confirm('Are you sure you want to delete this item?');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" style="background:red;color:white;padding:6px 12px;border-radius:6px;">
-                    Remove
-                </button>
-            </form>
-        @else
-            <span class="text-gray-400 italic">Locked</span>
-        @endif
+        <form action="{{ route('menu.destroy', $item->id) }}"
+              method="POST"
+              onsubmit="return confirm('Are you sure you want to delete this item?');">
+            @csrf
+            @method('DELETE')
+            <button type="submit"
+                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                Delete
+            </button>
+        </form>
     </div>
 </td>
-
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-2 text-center text-gray-500">No menu items found.</td>
+                                <td colspan="6" class="text-center py-4">No Menu Items Found</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
 
-                <style>
-                    .mode-buttons {
-                        display: flex;
-                        justify-content: flex-start;
-                        gap: 20px;
-                    }
+                {{-- PAGINATION --}}
+                <div class="mt-4">
+                    {{ $menuItems->withQueryString()->links() }}
+                </div>
 
-                    .action-button {
-                        min-width: 150px;
-                        padding: 10px 20px;
-                        font-size: 16px;
-                        border: 2px solid #16a34a;
-                        border-radius: 8px;
-                        background-color: #f9fafb;
-                        color: #16a34a;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                        text-align: center;
-                        display: inline-block;
-                    }
-
-                    .action-button:hover {
-                        background-color: #16a34a;
-                        color: white;
-                    }
-                </style>
             </div>
         </div>
     </div>

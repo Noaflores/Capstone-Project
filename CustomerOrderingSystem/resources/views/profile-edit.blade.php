@@ -8,7 +8,7 @@
             margin: 0; 
             background-color: #F0F0F0; /* Light gray background */
         }
-        
+
         /* Top Header Bar */
         .top-bar {
             background-color: #C4FFB6; /* Light green background */
@@ -31,7 +31,7 @@
             width: 40px;
             margin-right: 10px;
         }
-        
+
         /* Main Profile Content Area */
         .profile-content {
             max-width: 900px;
@@ -42,7 +42,7 @@
             align-items: flex-start; /* Align items to the top */
             position: relative; /* For positioning buttons */
         }
-        
+
         /* Profile Image Placeholder */
         .profile-image-placeholder {
             width: 200px;
@@ -131,36 +131,56 @@
         <img src="{{ asset('images/cafelogowbg.png') }}" alt="Café Logo" class="logo">
         Caffè Sant’Antonio
     </div>
-    </div>
+</div>
 
 <div class="profile-content">
+
+    <!-- Profile Image Placeholder -->
     <div class="profile-image-placeholder">
         &#128100; 
     </div>
-    
-    <form method="POST" action="{{ route('profile.update') }}" class="user-info-grid">
-        @csrf
-        
-        <div class="info-label">First and Last Name:</div>
-        <div class="info-input-wrapper">
-            <input type="text" name="name" value="{{ $user->name}}">
-        </div>
 
-        <div class="info-label">Email:</div>
-        <div class="info-input-wrapper">
-            <input type="email" name="email" value="{{ $user->email}}">
-        </div>
+    <div style="flex-grow:1;">
 
-        <div class="info-label">Contact Number:</div>
-        <div class="info-input-wrapper">
-            <input type="text" name="contact_number" value="{{ $user->contact_number}}">
-        </div>
+        <!-- Display validation errors if form submission fails -->
+        @if ($errors->any())
+            <div style="background:#f8d7da;color:#721c24;padding:10px;border-radius:5px;margin-bottom:15px;">
+                <ul style="margin:0;padding-left:20px;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        <div class="button-group">
-            <a href="{{ route('profile') }}" class="action-button">Cancel</a>
-            <button type="submit" class="action-button">Change</button>
-        </div>
-    </form>
+        <!-- Form for updating user profile information -->
+        <form method="POST" action="{{ route('profile.update') }}" class="user-info-grid">
+            @csrf
+            @method('PUT') <!-- Method spoofing since HTML forms only support GET and POST -->
+
+            <div class="info-label">First and Last Name:</div>
+            <div class="info-input-wrapper">
+                <input type="text" name="name" value="{{ old('name', $user->name) }}" required>
+            </div>
+
+            <div class="info-label">Email:</div>
+            <div class="info-input-wrapper">
+                <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
+            </div>
+
+            <div class="info-label">Contact Number:</div>
+            <div class="info-input-wrapper">
+                <input type="text" name="contact_number" value="{{ old('contact_number', $user->contact_number) }}">
+            </div>
+
+            <!-- Action buttons -->
+            <div class="button-group">
+                <a href="{{ route('profile') }}" class="action-button">Cancel</a>
+                <button type="submit" class="action-button">Change</button>
+            </div>
+        </form>
+
+    </div>
 </div>
 
 </body>

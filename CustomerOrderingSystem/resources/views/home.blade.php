@@ -4,14 +4,14 @@
     <title>Home Page (Customer)</title>
     <style>
         body { 
-            font-family: Georgia, serif; /* Using Georgia/serif for an elegant look */
+            font-family: Georgia, serif; 
             margin: 0;
-            background-color: #F0F0F0; /* Light gray background for contrast */
+            background-color: #F0F0F0;
         }
         
         /* The main container for the header content */
         .top-bar {
-            background-color: #C4FFB6; /* Light green background */
+            background-color: #C4FFB6; 
             padding: 10px 20px;
             display: flex;
             justify-content: space-between;
@@ -27,21 +27,19 @@
             color: #333;
         }
 
-        /* Styling for the logo image */
         .logo-container img {
-            width: 50px; /* Size of the logo */
+            width: 50px;
             margin-right: 10px;
         }
         
         /* Navigation Links (Buttons) */
         nav a,
         nav button {
-            /* Basic styling to make them look like buttons */
-            background-color: #5CB85C; /* A darker, vibrant green */
+            background-color: #5CB85C;
             color: white;
             text-decoration: none;
             padding: 8px 15px;
-            border-radius: 20px; /* Rounded corners */
+            border-radius: 20px;
             margin-left: 10px;
             font-size: 1em;
             font-weight: bold;
@@ -52,12 +50,12 @@
         
         nav a:hover,
         nav button:hover {
-            background-color: #4CAF50; /* Slightly darker on hover */
+            background-color: #4CAF50;
         }
         
         /* Main Welcome Section Styling */
         .welcome-section {
-            background-color: #E0F5E0; /* Slightly different green below the header */
+            background-color: #E0F5E0;
             padding: 20px 0;
             text-align: center;
             margin-bottom: 20px;
@@ -80,8 +78,8 @@
         .main-content img {
             max-width: 80%;
             height: auto;
-            border-radius: 15px; /* Rounded corners for the image */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -93,12 +91,12 @@
         Caffè Sant’Antonio
     </div>
     <nav>
-    <a href="{{ route('menu.index') }}">Menu</a>
-    <a href="{{ route('about') }}">About</a>
-    <a href="{{ route('profile') }}">User Profile</a>
-    <a href="{{ route('contacts') }}">Contacts</a> 
-    <a href="{{ route('cart.index') }}">Cart</a>
-</nav>
+        <a href="{{ route('menu.index') }}">Menu</a>
+        <a href="{{ route('about') }}">About</a>
+        <a href="{{ route('profile') }}">User Profile</a>
+        <a href="{{ route('contacts') }}">Contacts</a> 
+        <!-- Cart button removed -->
+    </nav>
 </div>
 
 <div class="welcome-section">

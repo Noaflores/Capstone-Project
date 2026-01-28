@@ -8,68 +8,120 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class SalesReportController extends Controller
 {
+    /**
+     * Display the sales report page with optional filters
+     */
     public function index(Request $request)
-{
-    $selectedMonth = $request->input('month');
-    $sales = collect();
-    $totalSales = 0;
+    {
+        $selectedMonth = $request->month;
+        $searchSales = $request->search_sales;
+        $searchCustomers = $request->search_customers;
 
-    if ($selectedMonth) {
-        $sales = DB::table('order_items')
-            ->join('menu_items', 'order_items.item_id', '=', 'menu_items.item_id')
-            ->select(
-                'menu_items.item_id as item_id',
-                'menu_items.name as item_name',
-                DB::raw('SUM(order_items.quantity) as amount_sold'),
-                DB::raw('SUM(order_items.quantity * menu_items.price) as subtotal')
-            )
-            ->whereMonth('order_items.created_at', $selectedMonth)
-            ->groupBy('menu_items.item_id', 'menu_items.name')
+        $months = [
+            1 => 'January', 2 => 'February', 3 => 'March',
+            4 => 'April', 5 => 'May', 6 => 'June',
+            7 => 'July', 8 => 'August', 9 => 'September',
+            10 => 'October', 11 => 'November', 12 => 'December'
+        ];
+
+        // SALES QUERY with pagination (10 per page)
+$sales = DB::table('sales')
+    ->select(
+        'item_id',
+        'item_name',
+        'size',            // <-- include size
+        'user_id',
+        'price',
+        'created_at',
+        DB::raw('quantity as amount_sold'),
+        'subtotal'
+    )
+    ->when($selectedMonth, fn($q) => $q->whereMonth('created_at', $selectedMonth))
+    ->when($searchSales, function ($query) use ($searchSales) {
+        $query->where(function ($q) use ($searchSales) {
+            $q->where('item_name', 'like', "%{$searchSales}%")
+              ->orWhere('user_id', 'like', "%{$searchSales}%")
+              ->orWhere('item_id', 'like', "%{$searchSales}%");
+        });
+    })
+    ->orderBy('created_at', 'desc')
+    ->paginate(10)
+    ->withQueryString(); // preserve filters/search across pages
+
+// Calculate total sales for the current filtered result
+$totalSales = $sales->sum('subtotal');
+
+
+        // CUSTOMERS QUERY (no pagination)
+        $customers = DB::table('tbl_customer')
+            ->when($searchCustomers, function ($query) use ($searchCustomers) {
+                $query->where(function ($q) use ($searchCustomers) {
+                    $q->where('Email', 'like', "%{$searchCustomers}%")
+                      ->orWhere('contact_number', 'like', "%{$searchCustomers}%");
+                });
+            })
             ->get();
 
-        $totalSales = $sales->sum('subtotal');
+        return view('manager.sales-reports', compact(
+            'sales',
+            'totalSales',
+            'months',
+            'selectedMonth',
+            'customers',
+            'searchSales',
+            'searchCustomers'
+        ));
     }
 
-    $months = [
-        '01' => 'January', '02' => 'February', '03' => 'March', '04' => 'April',
-        '05' => 'May', '06' => 'June', '07' => 'July', '08' => 'August',
-        '09' => 'September', '10' => 'October', '11' => 'November', '12' => 'December'
-    ];
+    /**
+     * Download PDF of sales report using Nauman Neue font
+     */
+    public function downloadPDF(Request $request)
+    {
+        $selectedMonth = $request->input('month');
+        $searchTerm = $request->input('search_sales');
 
-    return view('manager.sales-reports', compact('sales', 'totalSales', 'months', 'selectedMonth'));
-}
+        $months = [
+            1 => 'January', 2 => 'February', 3 => 'March',
+            4 => 'April', 5 => 'May', 6 => 'June',
+            7 => 'July', 8 => 'August', 9 => 'September',
+            10 => 'October', 11 => 'November', 12 => 'December'
+        ];
 
-public function downloadPDF(Request $request)
-{
-    $selectedMonth = $request->input('month', date('m'));
-    $months = [
-        '01' => 'January', '02' => 'February', '03' => 'March', '04' => 'April',
-        '05' => 'May', '06' => 'June', '07' => 'July', '08' => 'August',
-        '09' => 'September', '10' => 'October', '11' => 'November', '12' => 'December'
-    ];
-
-    $sales = DB::table('order_items')
-        ->join('menu_items', 'order_items.item_id', '=', 'menu_items.item_id')
-        ->select(
-            'menu_items.item_id as item_id',
-            'menu_items.name as item_name',
-            DB::raw('SUM(order_items.quantity) as amount_sold'),
-            DB::raw('SUM(order_items.quantity * menu_items.price) as subtotal')
-        )
-        ->whereMonth('order_items.created_at', $selectedMonth)
-        ->groupBy('menu_items.item_id', 'menu_items.name')
-        ->get();
-
-    $totalSales = $sales->sum('subtotal');
-    $monthName = $months[$selectedMonth] ?? 'Unknown';
-
-    $pdf = Pdf::loadView('manager.sales-pdf', compact('sales', 'totalSales', 'monthName'))
-        ->setPaper('a4', 'portrait')
-        ->setOption('isHtml5ParserEnabled', true)
-        ->setOption('isRemoteEnabled', true);
-
-    return $pdf->download("Sales_Report_{$monthName}.pdf");
-}
+        // Get all sales (no pagination for PDF)
+$sales = DB::table('sales')
+    ->select(
+        'item_id',
+        'item_name',
+        'size',         // <-- include size here too
+        'user_id',
+        'price',
+        'created_at',
+        DB::raw('quantity as amount_sold'),
+        'subtotal'
+    )
+    ->when($selectedMonth, fn($q) => $q->whereMonth('created_at', $selectedMonth))
+    ->when($searchTerm, function ($query) use ($searchTerm) {
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('item_name', 'like', "%{$searchTerm}%")
+              ->orWhere('user_id', 'like', "%{$searchTerm}%")
+              ->orWhere('item_id', 'like', "%{$searchTerm}%");
+        });
+    })
+    ->orderBy('created_at', 'desc')
+    ->get();
 
 
+        $totalSales = $sales->sum('subtotal');
+        $monthName = $months[$selectedMonth] ?? 'Unknown';
+
+        $pdf = Pdf::loadView('manager.sales-pdf', compact('sales', 'totalSales', 'monthName'))
+            ->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
+
+        $pdf->getDomPDF()->getOptions()->set('defaultFont', 'nauman');
+
+        return $pdf->download("Sales_Report_{$monthName}.pdf");
+    }
 }

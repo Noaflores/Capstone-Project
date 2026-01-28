@@ -1,17 +1,22 @@
 <?php
 
-
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\OrderController;
 
-Route::get('/', function () { return redirect('/login'); });
+/*
+|--------------------------------------------------------------------------
+| Public Routes (Guest)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', fn () => redirect()->route('login'));
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
@@ -19,69 +24,52 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.perform');
 Route::get('/signup', [RegisterController::class, 'showSignupForm']);
 Route::post('/signup', [RegisterController::class, 'register'])->name('signup.perform');
 
-Route::get('/home', function () {
-    return view('home'); // Ensure your 2nd code snippet is saved as home.blade.php
-})->name('home');
+Route::get('/about', fn () => view('about'))->name('about');
+Route::get('/contacts', fn () => view('contacts'))->name('contacts');
 
-Route::post('/logout', [LoginController::class, 'logout']);
-
-Route::get('/about', function () {
-    return view('about'); // Assumes the file is resources/views/about.blade.php
-})->name('about');
-
-Route::get('/contacts', function () {
-    return view('contacts'); // Loads the contacts.blade.php file
-})->name('contacts');
-
-// Protected Routes Group (requires user to be logged in)
-Route::middleware(['auth'])->group(function () {
-
-    // ... existing protected routes (like /home) ...
-
-    // User Profile Page Route
-    Route::get('/profile', function () {
-        // Pass the authenticated user data to the view
-        return view('profile', ['user' => Auth::user()]); 
-    })->name('profile');
-
-    // ... other protected routes ...
-});
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (Authenticated Users Only)
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show'])
-        ->name('profile');
 
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-});
+    // Auth
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/home', fn () => view('home'))->name('home');
 
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-// The main menu page
-Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
+    // Menu
+    Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
+    Route::get('/menu/category/{id}', [MenuController::class, 'showCategory'])->name('menu.category');
+    Route::get('/menu/subcategory/{id}', [MenuController::class, 'showSubcategory'])->name('menu.subcategory.show');
 
-// The specific category page (e.g., /menu/1 for Coffee)
-Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
-Route::get('/menu/{id}', [MenuController::class, 'show'])->name('menu.category');
-Route::get('/item/{id}', [ItemController::class, 'show'])->name('item.show');
-
-Route::middleware(['auth'])->group(function () {
-    // ... other protected routes ...
-
+    // =========================
+    // Cart Routes
+    // =========================
+    // Show cart
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+
+    // Add item to cart
     Route::post('/cart/add', [CartController::class, 'addItem'])->name('cart.add');
-    Route::post('/cart/remove/{itemId}', [CartController::class, 'removeItem'])->name('cart.remove');
-    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+
+    // Remove item from cart
+    Route::post('/cart/remove', [CartController::class, 'removeItem'])->name('cart.remove');
+
+    // Cancel purchase (use POST for safety)
     Route::post('/cart/cancel', [CartController::class, 'cancel'])->name('cart.cancel');
-    Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-    Route::post('/cart/confirm', [CartController::class, 'showConfirmation'])->name('cart.confirm.submit');
-    Route::get('/cart/confirm', [CartController::class, 'confirmPage'])->name('cart.confirm');
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/add', [CartController::class, 'addItem'])->name('cart.add');
-    Route::post('/order/proceed', [CartController::class, 'processOrder'])->name('order.proceed');
-    Route::get('/payment/completed', [CartController::class, 'showCompletedPage'])->name('payment.completed');
 
-    Route::post('/order/proceed', [CartController::class, 'processOrder'])->name('order.proceed');
-    Route::get('/payment/completed', [CartController::class, 'showCompletedPage'])->name('payment.completed');
+    // Process order (show confirmation page)
+    Route::post('/cart/checkout', [CartController::class, 'processOrder'])->name('cart.checkout');
 
+    // Complete order (after confirmation)
+    Route::post('/cart/complete', [CartController::class, 'completeOrder'])->name('cart.complete');
+
+    // Show thank-you page
+    Route::get('/cart/completed', [CartController::class, 'showCompletedPage'])->name('payment.completed');
 });
-

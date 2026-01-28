@@ -11,24 +11,35 @@ class Customer extends Authenticatable
 
     protected $table = 'tbl_customer';
     protected $primaryKey = 'customer_id'; // Custom PK
-    public $incrementing = false;         // Because it's a string (e.g., CUST-01)
+    public $incrementing = false;         // IDs like "CUST-01"
     protected $keyType = 'string';
     public $timestamps = false;
 
     protected $fillable = [
-        'customer_id', 
-        'first_name', 
-        'last_name', 
-        'Email', 
-        'contact_number', 
-        'password'
+        'customer_id',
+        'first_name',
+        'last_name',
+        'Email',
+        'contact_number',
+        'password',
+        // Add gcash_name and gcash_number if needed
+        'gcash_name',
+        'gcash_number',
     ];
 
     /**
-     * This tells Laravel to use 'Email' instead of 'email' for login
+     * Use Email as the login identifier
      */
     public function getAuthIdentifierName()
     {
         return 'Email';
+    }
+
+    /**
+     * Return full name
+     */
+    public function getFullNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
     }
 }

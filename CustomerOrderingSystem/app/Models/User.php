@@ -6,18 +6,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    protected $table = 'customers'; // 👈 your table name
+    protected $table = 'customers';
+    protected $primaryKey = 'customer_id';
 
-    protected $primaryKey = 'customer_id'; // 👈 PK name
-
-    public $incrementing = false; // varchar PK
+    public $incrementing = false;
     protected $keyType = 'string';
 
+    // ⚡ Use lowercase for easier Laravel mapping
     protected $fillable = [
-        'customer_id',
         'first_name',
         'last_name',
-        'Email',
+        'email', // lowercase, map to DB in accessor
         'contact_number',
         'password',
     ];
@@ -26,9 +25,27 @@ class User extends Authenticatable
         'password',
     ];
 
-    // Fix email column name
+    // Map lowercase 'email' to DB column 'Email'
     public function getEmailAttribute()
     {
         return $this->attributes['Email'];
+    }
+
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['Email'] = $value;
+    }
+
+    // Helper to get full name
+    public function getNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    public function setNameAttribute($value)
+    {
+        $names = explode(' ', $value, 2);
+        $this->attributes['first_name'] = $names[0];
+        $this->attributes['last_name'] = $names[1] ?? '';
     }
 }

@@ -9,6 +9,12 @@ class MenuCategory extends Model
 {
     use HasFactory;
 
+    public function subcategories() 
+    {
+        return $this->hasMany(SubCategory::class, 'category_id'); 
+        // 'category_id' is the foreign key in menu_subcategories table
+    }
+
     // Specify the table name (optional if it follows Laravel's naming convention)
     protected $table = 'menu_categories';
 

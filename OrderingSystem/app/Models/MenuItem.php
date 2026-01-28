@@ -9,24 +9,32 @@ class MenuItem extends Model
 {
     use HasFactory;
 
+    protected $table = 'menu_items';
     protected $primaryKey = 'id';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = true; // or false if your IDs are strings
+    protected $keyType = 'int'; // change to 'string' if using string IDs
 
     protected $fillable = [
-    'name',
-    'sub_category_id',
-    'description',
-    'price',
-    'image_path',
-    'is_available',
-];
-
+        'name',
+        'sub_category_id',
+        'description',
+        'price',
+        'image_path',
+        'is_available',
+        'item_type',
+    ];
 
     public $timestamps = false;
-    
-    public function orders()
+
+    // Relationship to SubCategory
+    public function subCategory()
     {
-        return $this->hasMany(OrderItem::class, 'id', 'id');
+        return $this->belongsTo(SubCategory::class, 'sub_category_id', 'id');
+    }
+
+    // Relationship to OrderItem
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'menu_item_id', 'id');
     }
 }

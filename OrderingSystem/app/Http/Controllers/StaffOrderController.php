@@ -5,108 +5,112 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\User;
-use App\Models\MenuItem;
+use App\Models\Sale;
+use Illuminate\Support\Facades\DB;
 
 class StaffOrderController extends Controller
 {
     /**
-     * Show all orders
+     * Display all orders for staff
      */
     public function index()
-{
-    $orders = \DB::table('order_items')
-        ->join('orders', 'order_items.order_id', '=', 'orders.id')
-        ->join('menu_items', 'order_items.item_id', '=', 'menu_items.item_id')
-        ->select(
-            'order_items.order_id',
-            \DB::raw('SUM(order_items.quantity * menu_items.price) as total'),
-            \DB::raw('MAX(order_items.created_at) as created_at'),
-            \DB::raw('MAX(order_items.status) as status')
-        )
-        ->groupBy('order_items.order_id')
-        ->whereNotNull('orders.customer_id') // Only show orders made by real customers
-        ->get();
+    {
+        $orders = Order::with('orderItems')->whereNotNull('user_id')->get();
 
-    return view('staffs.orders', compact('orders'));
-}
+        // Add formatted order ID for display
+        foreach ($orders as $order) {
+            $order->formatted_order_id = 'ORD' . str_pad($order->order_id, 2, '0', STR_PAD_LEFT);
+        }
 
+        return view('staffs.orders', compact('orders'));
+    }
 
     /**
-     * Show the edit status form for a specific order item
+     * Show edit status form for a specific order
      */
     public function editStatus($id)
 {
-    // Fetch the order by its ID
-    $order = Order::findOrFail($id);
+    $order = Order::with('orderItems')->findOrFail($id);
 
-    // Fetch all items belonging to this order
-    $orderItems = OrderItem::where('order_id', $order->id)->get();
+    // Calculate subtotal for each item dynamically
+    $orderItems = $order->orderItems->map(function ($item) {
+        $item->subtotal = $item->price * $item->quantity;
 
-    // Calculate total properly
+        // Clean size: store null if empty or 'N/A'
+        if (empty($item->size) || $item->size === 'N/A') {
+            $item->size = null;
+        }
+
+        return $item;
+    });
+
     $total = $orderItems->sum('subtotal');
-
-    // Generate formatted order ID
-    $order->formatted_order_id = 'ORD' . str_pad($order->id, 2, '0', STR_PAD_LEFT);
+    $order->formatted_order_id = 'ORD' . str_pad($order->order_id, 2, '0', STR_PAD_LEFT);
 
     return view('staffs.edit-status', [
-        'orderItem' => $order,
+        'orderItem'  => $order,
         'orderItems' => $orderItems,
-        'total' => $total,
+        'total'      => $total,
     ]);
 }
 
 
     /**
-     * Update the status of a specific order item
+     * Update the status of a specific order
      */
     public function updateStatus(Request $request, $id)
-{
-    $request->validate([
-        'status' => 'required|string|max:50',
-    ]);
+    {
+        $request->validate([
+            'status' => 'required|string|max:50',
+        ]);
 
-    // Find the order
-    $order = Order::findOrFail($id);
+        $order = Order::findOrFail($id);
+        $order->status = $request->status;
+        $order->save();
 
-    // Update its status
-    $order->status = $request->status;
-    $order->save();
+        return redirect()->route('staff.orders')
+            ->with('success', 'Order status updated successfully!');
+    }
 
-    // Optional: also update all related order_items
-    OrderItem::where('order_id', $order->id)->update(['status' => $request->status]);
-
-    return redirect()
-        ->route('staff.orders')
-        ->with('success', 'Order status updated successfully!');
-}
-
-    
+    /**
+     * Finish an order: record it in sales and delete the order
+     */
     public function finish($id)
 {
-    $order = Order::findOrFail($id);
+    try {
+        DB::transaction(function () use ($id) {
+            $order = Order::with('orderItems')->whereNotNull('user_id')->findOrFail($id);
+            $customerId = $order->user_id;
 
-    // Optional: You can log, archive, or store history here before deletion
-    $order->delete();
+            foreach ($order->orderItems as $item) {
+                // Clean size before saving to sales
+                $itemSize = (!empty($item->size) && $item->size !== 'N/A') ? $item->size : null;
 
-    return redirect()->route('staff.orders')
-                     ->with('success', 'Order marked as finished and removed successfully.');
-}
+                $sale = Sale::create([
+                    'order_item_id' => $item->order_item_id,
+                    'user_id'       => $customerId,
+                    'item_id'       => $item->item_id,
+                    'item_name'     => $item->item_name,
+                    'size'          => $itemSize, // <- include size in sales table if you add it
+                    'quantity'      => $item->quantity,
+                    'price'         => $item->price,
+                    'subtotal'      => $item->subtotal ?? ($item->price * $item->quantity),
+                ]);
+            }
 
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'customer_id' => 'required|integer',
-        'item_name' => 'required|string',
-        'quantity' => 'required|integer|min:1',
-        'price' => 'required|numeric|min:0',
-    ]);
+            $order->orderItems()->delete();
+            $order->delete();
+        });
 
-    $validated['total'] = $validated['quantity'] * $validated['price'];
+        return redirect()->route('staff.orders')
+            ->with('success', 'Order completed, recorded in sales, and removed successfully.');
 
-    Order::create($validated);
+    } catch (\Exception $e) {
+        logger()->error('Failed to record sales for order_id ' . $id . ': ' . $e->getMessage());
 
-    return redirect()->back()->with('success', 'Order recorded successfully!');
+        return redirect()->route('staff.orders')
+            ->with('error', 'Failed to record sales. Check logs for details.');
+    }
 }
 
 }

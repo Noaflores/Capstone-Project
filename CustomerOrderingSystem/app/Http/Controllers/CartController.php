@@ -3,180 +3,240 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-    /**
-     * Display the user's shopping cart.
-     */
-
+    // =========================
+    // ADD ITEM TO CART
+    // =========================
     public function addItem(Request $request)
     {
         $validated = $request->validate([
-            'item_id' => 'required|integer',
-            'name' => 'required|string',
-            'price' => 'required|numeric',
+            'item_id'  => 'required|integer',
+            'name'     => 'required|string',
+            'price'    => 'required|numeric',
             'quantity' => 'required|integer|min:1',
-            'size' => 'required|string'
+            'size'     => 'nullable|string',
         ]);
 
-        // Get the current cart from the session, or an empty array if it doesn't exist
-        $cart = $request->session()->get('cart', []);
-        
-        $itemId = $validated['item_id'];
-        $quantity = $validated['quantity'];
-        
-        // Prepare the new item data
-        $newItem = [
-            'id' => $itemId,
-            'name' => $validated['name'],
-            'price' => $validated['price'],
-            'quantity' => $quantity,
-            'order_date' => now()->format('Y-m-d'), // Use current date
-            'size' => $request->size
-        ];
-        
-        // Check if the item already exists in the cart (to update quantity)
-        if (isset($cart[$itemId])) {
-    // Increments quantity if item already exists
-    $cart[$itemId]['quantity'] += $quantity; 
-    } else {
-    // Adds as a new item
-    $cart[$itemId] = $newItem;
-}
+        $cart = session()->get('cart', []);
 
-        // Store the updated cart array back into the session
-        $request->session()->put('cart', $cart);
+        $size = $validated['size'] ?? 'N/A';
+        $uniqueKey = $validated['item_id'] . '_' . $size;
+        $price = (float)$validated['price'];
 
-        return redirect()->route('cart.index')->with('status', 'Item added to cart!');
+        if (isset($cart[$uniqueKey])) {
+            $cart[$uniqueKey]['quantity'] += $validated['quantity'];
+        } else {
+            $cart[$uniqueKey] = [
+                'id'         => $validated['item_id'],
+                'name'       => $validated['name'],
+                'size'       => $size,
+                'price'      => $price,
+                'quantity'   => $validated['quantity'],
+                'order_date' => now()->format('Y-m-d H:i:s'),
+            ];
+        }
+
+        $cart[$uniqueKey]['subtotal'] = $cart[$uniqueKey]['price'] * $cart[$uniqueKey]['quantity'];
+
+        session()->put('cart', $cart);
+
+        $sizeText = ($size !== 'N/A') ? " ({$size})" : '';
+        return redirect()->route('cart.index')
+                         ->with('status', $validated['name'] . $sizeText . ' added to cart!');
     }
 
-
-    /**
-     * Display the user's shopping cart. (UPDATED to use Session)
-     */
-    public function index(Request $request)
+    // =========================
+    // SHOW CART
+    // =========================
+    public function index()
     {
-        // Fetch cart items from the session
-        $cartItems = $request->session()->get('cart', []);
-        
-        // Convert the associative array back to a simple list for the view if needed, 
-        // or just pass the values
-        $cartItemsList = array_values($cartItems); 
+        $cart = session()->get('cart', []);
+        $cartItemsList = [];
 
-        $totalItems = count($cartItemsList);
-        $totalPrice = array_sum(array_map(fn($item) => $item['quantity'] * $item['price'], $cartItemsList));
+        foreach ($cart as $key => $item) {
+            $cartItemsList[] = [
+                'key'        => $key,
+                'id'         => $item['id'],
+                'name'       => $item['name'],
+                'size'       => $item['size'] ?? null,
+                'quantity'   => $item['quantity'],
+                'price'      => $item['price'],
+                'subtotal'   => $item['subtotal'],
+                'order_date' => $item['order_date'] ?? '-',
+            ];
+        }
+
+        $totalItems = collect($cartItemsList)->sum('quantity');
+        $totalPrice = collect($cartItemsList)->sum('subtotal');
 
         return view('cart.payment.index', compact('cartItemsList', 'totalItems', 'totalPrice'));
     }
-    /**
-     * Handle updating cart items (e.g., changing quantity).
-     */
-    public function update(Request $request)
+
+    // =========================
+    // REMOVE ITEM FROM CART
+    // =========================
+    public function removeItem(Request $request)
     {
-        // Logic to update cart item quantity or remove items
-        return redirect()->route('cart.index')->with('status', 'Cart updated.');
-    }
+        $cartKey = $request->input('cart_key');
+        $cart = session()->get('cart', []);
 
-    /**
-     * Handle canceling the entire purchase.
-     */
-    public function cancel()
-    {
-        // Logic to clear the cart or mark an order as canceled
-         return redirect('menu')->with('status', 'Purchase cancelled.');
-    }
-
-    
-    public function removeItem(Request $request, $itemId)
-    {
-        // Get the current cart from the session
-        $cart = $request->session()->get('cart', []);
-
-        // Check if the item exists in the cart by its ID (which is the array key)
-        if (isset($cart[$itemId])) {
-            // Remove the item from the array
-            unset($cart[$itemId]);
-
-            // Store the modified cart array back into the session
-            $request->session()->put('cart', $cart);
-
-            return redirect()->route('cart.index')->with('status', 'Item successfully removed from cart.');
+        if (isset($cart[$cartKey])) {
+            unset($cart[$cartKey]);
+            session()->put('cart', $cart);
         }
 
-        return redirect()->route('cart.index')->with('error', 'Item not found in cart.');
+        return redirect()->route('cart.index')->with('status', 'Item removed from cart.');
     }
 
-    public function checkout(Request $request)
+    // =========================
+    // CANCEL PURCHASE
+    // =========================
+    public function cancel()
     {
-        $paymentMethod = $request->input('payment_method');
-        
-        // For demonstration, let's store payment details in session
-        // In a real app, you might store this in a temporary order table
-        $cartItems = $request->session()->get('cart', []);
-        $totalPrice = array_sum(array_map(fn($item) => $item['quantity'] * $item['price'], array_values($cartItems)));
-
-        $request->session()->put('current_payment_details', [
-            'method' => $paymentMethod,
-            'total' => $totalPrice,
-            // Example GCash details (these would usually come from config or a user profile)
-            'gcash_number' => '09159999999', 
-            'gcash_name' => 'Ca** S*****O', 
-        ]);
-
-        // Redirect to the new confirmation page
-        return redirect()->route('cart.confirm');
+        session()->forget('cart');
+        return redirect()->route('menu.index')->with('status', 'Purchase cancelled.');
     }
 
-    /**
-     * Display the order confirmation page.
-     */
-    public function showConfirmation(Request $request)
-{
-    $request->session()->put('confirmation', [
-        'method' => 'GCash',
-        'gcash_number' => '09171234567',
-        'gcash_name' => 'John Doe',
-        'total' => $request->base_price * $request->quantity,
-    ]);
-
-    return redirect()->route('cart.confirm');
-}
-
-public function confirmPage(Request $request)
-{
-    $paymentDetails = $request->session()->get('confirmation');
-
-    if (!$paymentDetails) {
-        return redirect()->route('menu.index');
-    }
-
-    return view('confirmation', compact('paymentDetails'));
-}
-
-
+    // =========================
+    // PROCESS ORDER (Show confirmation with prefilled GCash)
+    // =========================
     public function processOrder(Request $request)
     {
-        // In a real application, this is where you would:
-        // 1. Permanently save the order details to your 'orders' table.
-        // 2. Decrement stock levels.
-        // 3. Send order confirmation emails.
-        // 4. Handle actual payment gateway interaction (if not already done).
+        $cartItems = session('cart', []);
+        if (empty($cartItems)) {
+            return redirect()->route('cart.index')->with('status', 'Your cart is empty!');
+        }
 
-        // Clear the cart and any temporary payment details from the session
-        $request->session()->forget('cart'); 
-        $request->session()->forget('current_payment_details'); 
+        // Get customer using email (most reliable)
+        $customer = DB::table('tbl_customer')
+              ->where('gcash_number', '09123456789')
+              ->first();
 
-        // Redirect to the new payment completed page
-        return redirect()->route('payment.completed');
+
+        if (!$customer) {
+            return redirect()->route('cart.index')
+                             ->with('status', 'Invalid customer ID. Please check your account.');
+        }
+
+        $total = array_sum(array_map(fn($item) => $item['subtotal'], $cartItems));
+
+        // Insert order now with status "Pending GCash Payment" to generate order_id
+        DB::beginTransaction();
+        try {
+            $orderId = DB::table('orders')->insertGetId([
+    'user_id'        => $customer->customer_id,
+    'payment_method' => 'GCash',
+    'total'          => $total,
+    'status'         => 'Pending', // <-- changed from 'Pending GCash Payment'
+    'gcash_name'     => $customer->gcash_name ?? '',
+    'gcash_number'   => $customer->gcash_number ?? '',
+    'created_at'     => now(),
+    'updated_at'     => now(),
+]);
+
+
+            // Insert order items
+            foreach ($cartItems as $item) {
+                DB::table('order_items')->insert([
+                    'order_id'  => $orderId,
+                    'item_id'   => $item['id'],
+                    'item_name' => $item['name'],
+                    'size'      => $item['size'],
+                    'price'     => $item['price'],
+                    'quantity'  => $item['quantity'],
+                    'subtotal'  => $item['subtotal'],
+                    'created_at'=> now(),
+                    'updated_at'=> now(),
+                ]);
+            }
+
+            DB::commit();
+
+            // Save payment details in session for confirmation page
+            session(['paymentDetails' => [
+                'customer_id'  => $customer->customer_id,
+                'order_id'     => $orderId,
+                'cart_items'   => $cartItems,
+                'total'        => $total,
+                'method'       => 'GCash',
+                'gcash_name'   => $customer->gcash_name ?? '',
+                'gcash_number' => $customer->gcash_number ?? '',
+            ]]);
+
+            return view('cart.payment.confirmation', [
+                'paymentDetails' => session('paymentDetails')
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('cart.index')
+                             ->with('status', 'Failed to create order: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Display the payment completed page.
-     */
+    // =========================
+    // COMPLETE ORDER (After Confirmation)
+    // =========================
+    public function completeOrder(Request $request)
+    {
+        $paymentDetails = session('paymentDetails');
+
+        if (!$paymentDetails) {
+            return redirect()->route('cart.index')->with('status', 'No pending order found.');
+        }
+
+        // No need for user input, validate against DB
+        $customer = DB::table('tbl_customer')
+                      ->where('customer_id', $paymentDetails['customer_id'])
+                      ->first();
+
+        if (!$customer) {
+            return redirect()->route('cart.index')
+                             ->with('status', 'Invalid customer ID. Please check your account.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Order is already inserted, just update status to completed
+            DB::table('orders')
+    ->where('order_id', $paymentDetails['order_id']) // <- use order_id
+    ->update([
+        'status'     => 'Pending', // or whatever status you want
+        'updated_at' => now(),
+    ]);
+
+
+
+            DB::commit();
+
+            // Clear cart & payment session
+            session()->forget(['cart', 'paymentDetails']);
+
+            // Save order ID for thank-you page
+            session(['completedOrderId' => $paymentDetails['order_id']]);
+
+            return redirect()->route('payment.completed')
+                             ->with('status', 'Order successfully placed!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('cart.index')
+                             ->with('status', 'Order completion failed: ' . $e->getMessage());
+        }
+    }
+
+    // =========================
+    // SHOW COMPLETED PAGE
+    // =========================
     public function showCompletedPage()
     {
-        return view('cart.payment.completed'); // Assumes resources/views/cart/payment/completed.blade.php
+        $orderId = session('completedOrderId');
+        if (!$orderId) {
+            return redirect()->route('cart.index')->with('status', 'No completed order found.');
+        }
+
+        return view('cart.payment.completed', ['orderId' => $orderId]);
     }
 }

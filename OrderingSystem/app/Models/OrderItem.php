@@ -9,37 +9,27 @@ class OrderItem extends Model
 {
     use HasFactory;
 
+    protected $table = 'order_items';
+    protected $primaryKey = 'order_item_id';
+    public $incrementing = true;
+    protected $keyType = 'int';
+
     protected $fillable = [
         'order_id',
         'item_id',
+        'menu_item_id',
         'item_name',
         'quantity',
+        'price',
         'subtotal',
+        'status'
     ];
 
-    /**
-     * Relationship: OrderItem belongs to an Order
-     */
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
+    // Relation to parent order
+   // OrderItem.php
+public function order()
+{
+    return $this->belongsTo(Order::class, 'order_id', 'order_id');
+}
 
-    /**
-     * Accessor for formatted item ID (e.g., I001)
-     */
-    public function getFormattedItemIdAttribute()
-    {
-        return 'I' . str_pad($this->id, 3, '0', STR_PAD_LEFT);
-    }
-
-    /**
-     * Accessor for formatted order ID (e.g., ORD01)
-     */
-    public function getFormattedOrderIdAttribute()
-    {
-        // Ensure we have a related order before accessing ID
-        $orderId = $this->order->id ?? $this->order_id ?? 0;
-        return 'ORD' . str_pad($orderId, 2, '0', STR_PAD_LEFT);
-    }
 }
