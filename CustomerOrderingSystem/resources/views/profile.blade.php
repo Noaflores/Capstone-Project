@@ -150,23 +150,23 @@
         &#128100; </div>
     
     <div class="user-info-grid">
-        <div class="info-card">
-            {{ $user->first_name}} {{ $user->last_name}}
-            <small>First and Last Name</small>
-        </div>
-        <div class="info-card">
-            UID{{ $user->customer_id }}
-            <small>Customer ID</small>  
-        </div>
-        <div class="info-card">
-            {{ $user->Email}}
-            <small>Email</small>
-        </div>
-        <div class="info-card">
-            {{ $user->contact_number}}
-            <small>Contact Number</small>
-        </div>
+    <div class="info-card">
+        {{ $user->first_name }} {{ $user->last_name }}
+        <small>First and Last Name</small>
     </div>
+    <div class="info-card">
+        UID{{ $user->customer_id }}
+        <small>Customer ID</small>  
+    </div>
+    <div class="info-card">
+        {{ $user->email }}
+        <small>Email</small>
+    </div>
+    <div class="info-card">
+        {{ $user->contact_number }}
+        <small>Contact Number</small>
+    </div>
+</div>
 
     <a href="{{ route('profile.edit') }}" class="edit-button">Edit</a>
 </div>

@@ -24,7 +24,6 @@
     </div>
     <div>
         <a href="{{ route('menu.index') }}" class="return-button">Back to Menu</a>
-        <a href="{{ url('/home') }}" class="return-button">Homepage</a>
     </div>
 </div>
 

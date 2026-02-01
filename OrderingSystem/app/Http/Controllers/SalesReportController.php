@@ -53,14 +53,20 @@ $totalSales = $sales->sum('subtotal');
 
 
         // CUSTOMERS QUERY (no pagination)
-        $customers = DB::table('tbl_customer')
-            ->when($searchCustomers, function ($query) use ($searchCustomers) {
-                $query->where(function ($q) use ($searchCustomers) {
-                    $q->where('Email', 'like', "%{$searchCustomers}%")
-                      ->orWhere('contact_number', 'like', "%{$searchCustomers}%");
-                });
-            })
-            ->get();
+       $customers = DB::table('tbl_customer')
+    ->select(
+        'customer_id',
+        DB::raw('Email as email'),
+        'contact_number'
+    )
+    ->when($searchCustomers, function ($query) use ($searchCustomers) {
+        $query->where(function ($q) use ($searchCustomers) {
+            $q->where('Email', 'like', "%{$searchCustomers}%")
+              ->orWhere('contact_number', 'like', "%{$searchCustomers}%");
+        });
+    })
+    ->get();
+
 
         return view('manager.sales-reports', compact(
             'sales',

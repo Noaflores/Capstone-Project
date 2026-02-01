@@ -131,7 +131,7 @@
          Caffè Sant’Antonio
     </div>
     <div class="button-group">
-        <a href="{{ route('cart.index') }}" class="return-cart-button">Return to Cart</a>
+        <a href="{{ route('cart.index') }}" class="return-cart-button">View Cart</a>
         <a href="{{ url('/home') }}" class="return-button">Return to Homepage</a>
     </div>
 </div>

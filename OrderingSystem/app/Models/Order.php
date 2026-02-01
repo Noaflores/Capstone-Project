@@ -20,6 +20,11 @@ class Order extends Model
         'status',
     ];
 
+    public function customer()
+{
+    return $this->belongsTo(Customer::class, 'user_id', 'customer_id');
+}
+
     // Relation to order items
     public function orderItems()
     {

@@ -23,10 +23,13 @@
                 <table class="w-full border-collapse bg-white rounded-lg shadow-md">
                     <thead class="bg-gray-200 text-gray-700 uppercase text-sm">
                         <tr>
+                            <th class="px-6 py-3 text-left">GCash Name</th>
+                            <th class="px-6 py-3 text-left">GCash Number</th>
                             <th class="px-6 py-3 text-left">Order ID</th>
                             <th class="px-6 py-3 text-left">Total</th>
                             <th class="px-6 py-3 text-left">Order Date</th>
                             <th class="px-6 py-3 text-left">Status</th>
+                            <th class="px-6 py-3 text-left">Payment Method</th>
                             <th class="px-6 py-3 text-center w-38">Action</th>
 
                         </tr>
@@ -34,28 +37,38 @@
                     <tbody>
                         @foreach($orders as $order)
                             <tr class="border-t hover:bg-gray-50">
+                                <td class="px-6 py-3">{{ $order->customer->gcash_name ?? '—' }}</td>
+                                <td class="px-6 py-3">{{ $order->customer->gcash_number ?? '—' }}</td>
                                 <td class="px-6 py-3">{{ $order->formatted_order_id }}</td>
                                 <td class="px-6 py-3">₱{{ number_format($order->total, 2) }}</td>
-                                <td class="px-6 py-3">{{ \Carbon\Carbon::parse($order->created_at)->format('Y-m-d') }}</td>
+                                <td class="px-6 py-3">{{ \Carbon\Carbon::parse($order->created_at)->format('Y-m-d H:i:s') }}</td>
                                 <td class="px-6 py-3">{{ $order->status }}</td>
+                                <td class="px-6 py-3">{{ $order->payment_method ?? '—' }}</td>
+
 
                                 <td class="px-6 py-3 text-center">
     <div class="inline-flex items-center justify-center gap-3">
-        <!--  Edit Button -->
+
+        <!-- Edit Button -->
         <a href="{{ route('staff.orders.editStatus', ['id' => $order->order_id]) }}"
            class="bg-green-700 hover:bg-green-800 text-white px-3 py-1.5 rounded-md text-sm font-medium shadow-sm transition">
             Edit
         </a>
 
-        <!--  Finish Button -->
-<form action="{{ route('staff.orders.finish', $order->order_id) }}" method="POST">
-    @csrf
-    <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded">
-        Done
-    </button>
-</form>
+        <!-- Done Button (ONLY if Completed) -->
+        @if($order->status === 'Completed')
+            <form action="{{ route('staff.orders.finish', $order->order_id) }}" method="POST">
+                @csrf
+                <button type="submit"
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">
+                    Done
+                </button>
+            </form>
+        @endif
+
     </div>
 </td>
+
                             </tr>
                         @endforeach
                     </tbody>

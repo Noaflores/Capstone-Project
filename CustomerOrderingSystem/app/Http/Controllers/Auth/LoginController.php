@@ -22,7 +22,7 @@ class LoginController extends Controller
 
     // Match the DB column exactly (case sensitive)
     $credentials = [
-        'Email' => $request->email, // <-- if your DB column is "Email"
+        'email' => $request->email, // <-- if your DB column is "Email"
         'password' => $request->password,
     ];
 

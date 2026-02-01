@@ -18,37 +18,36 @@ class MenuController extends Controller
     }
 
     // Store new menu item
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name'             => 'required|string|max:255',
-            'sub_category_id'  => 'required|integer|min:1000|max:9999|unique:sub_categories,id',
-            'description'      => 'required|string',
-            'price'            => 'required|numeric|min:0',
-            'image'            => 'nullable|image|max:2048',
-            'item_type'        => 'required|string|in:Appetizers,Main Courses,Desserts,Snacks,Side Dishes,Beverages',
-        ], [
-            'sub_category_id.unique' => 'This Sub Category ID already exists. Please enter a different one.'
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'name'            => 'required|string|max:255',
+        'sub_category_id' => 'nullable|integer', // now optional
+        'description'     => 'required|string',
+        'price'           => 'required|numeric|min:0',
+        'image'           => 'nullable|image|max:2048',
+        'category'        => 'nullable|string', // optional, no restriction
+    ]);
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('menu_images', 'public');
-        }
-
-        MenuItem::create([
-            'name'             => $request->name,
-            'sub_category_id'  => $request->sub_category_id,
-            'description'      => $request->description,
-            'price'            => $request->price,
-            'image_path'       => $imagePath,
-            'is_available'     => true,
-            'item_type'        => $request->item_type,
-        ]);
-
-        return redirect()->route('menu.manage')
-                         ->with('success', 'Menu item created successfully!');
+    $imagePath = null;
+    if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('menu_images', 'public');
     }
+
+    MenuItem::create([
+        'name'            => $request->name,
+        'sub_category_id' => $request->sub_category_id,
+        'description'     => $request->description,
+        'price'           => $request->price,
+        'image_path'      => $imagePath,
+        'is_available'    => true,
+        'category'        => $request->category, // can be null
+    ]);
+
+    return redirect()->route('menu.manage')
+                     ->with('success', 'Menu item created successfully!');
+}
+
 
     public function checkSubCategory($id)
     {
@@ -62,9 +61,10 @@ class MenuController extends Controller
         $query = MenuItem::query();
 
         // Filter by type if selected
-        $categories = ['Appetizers','Main Courses','Desserts','Snacks','Side Dishes','Beverages'];
-        if ($request->filled('type') && in_array($request->type, $categories)) {
-            $query->where('item_type', $request->type);
+        $categories = ['Appetizer','Main Course','Dessert','Snack','Side Dish','Beverage'];
+if ($request->filled('type') && in_array($request->type, $categories)) {
+    $query->where('category', $request->type);
+
         }
 
         // Filter by search keyword if entered
@@ -88,39 +88,39 @@ class MenuController extends Controller
     }
 
     // Update menu item
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'sub_category_id' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|max:2048',
-            'item_type' => 'required|string|in:Appetizers,Main Courses,Desserts,Snacks,Side Dishes,Beverages',
-        ]);
+    // Update menu item
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'name'            => 'required|string|max:255',
+        'sub_category_id' => 'nullable|integer', // optional
+        'price'           => 'required|numeric|min:0',
+        'description'     => 'nullable|string',
+        'image'           => 'nullable|image|max:2048',
+        'category'        => 'nullable|string', // optional
+    ]);
 
-        $item = MenuItem::findOrFail($id);
+    $item = MenuItem::findOrFail($id);
 
-        // Image handling
-        if ($request->hasFile('image')) {
-            if ($item->image_path && Storage::disk('public')->exists($item->image_path)) {
-                Storage::disk('public')->delete($item->image_path);
-            }
-            $item->image_path = $request->file('image')->store('menu_images', 'public');
+    if ($request->hasFile('image')) {
+        if ($item->image_path && Storage::disk('public')->exists($item->image_path)) {
+            Storage::disk('public')->delete($item->image_path);
         }
-
-        $item->update([
-            'name' => $request->name,
-            'sub_category_id' => $request->sub_category_id,
-            'price' => $request->price,
-            'description' => $request->description,
-            'item_type' => $request->item_type,
-            'image_path' => $item->image_path,
-        ]);
-
-        return redirect()->route('menu.manage')
-                         ->with('success', 'Menu item updated successfully.');
+        $item->image_path = $request->file('image')->store('menu_images', 'public');
     }
+
+    $item->update([
+        'name'            => $request->name,
+        'sub_category_id' => $request->sub_category_id,
+        'price'           => $request->price,
+        'description'     => $request->description,
+        'category'        => $request->category, // can be null
+        'image_path'      => $item->image_path,
+    ]);
+
+    return redirect()->route('menu.manage')
+                     ->with('success', 'Menu item updated successfully.');
+}
 
     // Delete menu item
     public function destroy($id)

@@ -7,8 +7,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\ItemController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,27 +49,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/menu/category/{id}', [MenuController::class, 'showCategory'])->name('menu.category');
     Route::get('/menu/subcategory/{id}', [MenuController::class, 'showSubcategory'])->name('menu.subcategory.show');
 
-    // =========================
     // Cart Routes
-    // =========================
-    // Show cart
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/cancel', [CartController::class, 'cancelOrder'])->name('cart.cancel');
 
-    // Add item to cart
-    Route::post('/cart/add', [CartController::class, 'addItem'])->name('cart.add');
+    // Checkout
+    Route::post('/cart/checkout', [PaymentController::class, 'checkout'])->name('cart.checkout');
 
-    // Remove item from cart
-    Route::post('/cart/remove', [CartController::class, 'removeItem'])->name('cart.remove');
+    // GCash Payment
+    Route::get('/payment/gcash/{orderId}', [PaymentController::class, 'showGCashGateway'])->name('payment.gcash');
+    Route::post('/payment/gcash/callback/{orderId}', [PaymentController::class, 'gcashCallback'])->name('payment.gcash.callback');
 
-    // Cancel purchase (use POST for safety)
-    Route::post('/cart/cancel', [CartController::class, 'cancel'])->name('cart.cancel');
+    Route::prefix('payment')->name('payment.')->group(function() {
+    Route::get('cod/{orderId}', [PaymentController::class, 'showCODGateway'])->name('cod');
+    Route::post('cod/callback/{orderId}', [PaymentController::class, 'codCallback'])->name('cod.callback');
+});
 
-    // Process order (show confirmation page)
-    Route::post('/cart/checkout', [CartController::class, 'processOrder'])->name('cart.checkout');
+    // Payment completed page
+    Route::get('/payment/completed', fn () => view('cart.payment.completed'))->name('payment.completed');
 
-    // Complete order (after confirmation)
-    Route::post('/cart/complete', [CartController::class, 'completeOrder'])->name('cart.complete');
-
-    // Show thank-you page
-    Route::get('/cart/completed', [CartController::class, 'showCompletedPage'])->name('payment.completed');
 });

@@ -48,7 +48,6 @@
         <div class="menu-grid">
             @foreach($items as $item)
                 @php
-                    // Items with size options
                     $sizeItems = ['italian hot coffee','espresso','mocha frappe','frappe con caffe','frappe al latte','caramel frappe','vanilla latte frappe','hazelnut latte frappe'];
                     $itemName = strtolower(trim($item->name));
                     $hasSize = in_array($itemName, $sizeItems);
@@ -67,40 +66,42 @@
                         <p>{{ $item->description ?? '' }}</p>
 
                         <form method="POST" action="{{ route('cart.add') }}">
-                            @csrf
-                            <input type="hidden" name="item_id" value="{{ $item->id }}">
-                            <input type="hidden" name="name" value="{{ $item->name }}">
-                            <input type="hidden" name="price" id="price_input_{{ $item->id }}" value="{{ $item->price }}">
-                            <input type="hidden" name="quantity" id="quantity_input_{{ $item->id }}" value="1">
+    @csrf
+    <!-- Must be item_id to match CartController -->
+    <input type="hidden" name="item_id" value="{{ $item->id }}">
+    <input type="hidden" name="name" value="{{ $item->name }}">
+    <input type="hidden" name="price" id="price_input_{{ $item->id }}" value="{{ $item->price }}">
+    <input type="hidden" name="quantity" id="quantity_input_{{ $item->id }}" value="1">
 
-                            @if($hasSize)
-                                <div class="size-container">
-                                    <strong>Select Size:</strong>
-                                    <div class="size-options">
-                                        <input type="radio" id="medio_{{ $item->id }}" name="size" value="Medio" checked data-price="{{ $item->price }}">
-                                        <label for="medio_{{ $item->id }}" class="size-label">Medio</label>
-                                        <input type="radio" id="grande_{{ $item->id }}" name="size" value="Grande" data-price="{{ round($item->price * 1.0833) }}">
-                                        <label for="grande_{{ $item->id }}" class="size-label">Grande</label>
-                                    </div>
-                                </div>
-                            @else
-                                <input type="hidden" name="size" value="N/A">
-                            @endif
+    @if($hasSize)
+        <div class="size-container">
+            <strong>Select Size:</strong>
+            <div class="size-options">
+                <input type="radio" id="medio_{{ $item->id }}" name="size" value="Medio" checked data-price="{{ $item->price }}">
+                <label for="medio_{{ $item->id }}" class="size-label">Medio</label>
 
-                            <div class="item-price-quantity">
-                                <div class="price" id="price_display_{{ $item->id }}">₱{{ number_format($item->price, 2) }}</div>
-                                <div>
-                                    <button type="button" class="quantity-button" onclick="changeQuantity({{ $item->id }}, -1)">-</button>
-                                    <span id="quantity_display_{{ $item->id }}">1</span>
-                                    <button type="button" class="quantity-button" onclick="changeQuantity({{ $item->id }}, 1)">+</button>
-                                </div>
-                            </div>
+                <input type="radio" id="grande_{{ $item->id }}" name="size" value="Grande" data-price="{{ round($item->price * 1.0833, 2) }}">
+                <label for="grande_{{ $item->id }}" class="size-label">Grande</label>
+            </div>
+        </div>
+    @else
+        <input type="hidden" name="size" value="N/A">
+    @endif
 
-                            <div class="action-buttons-group">
-                                <button type="submit" class="btn-submit">Add to Cart</button>
-                                <a href="{{ route('menu.category', $subcategory->category_id ?? 1) }}" class="btn-return">Return</a>
-                            </div>
-                        </form>
+    <div class="item-price-quantity">
+        <div class="price" id="price_display_{{ $item->id }}">₱{{ number_format($item->price, 2) }}</div>
+        <div>
+            <button type="button" class="quantity-button" onclick="changeQuantity({{ $item->id }}, -1)">-</button>
+            <span id="quantity_display_{{ $item->id }}">1</span>
+            <button type="button" class="quantity-button" onclick="changeQuantity({{ $item->id }}, 1)">+</button>
+        </div>
+    </div>
+
+    <div class="action-buttons-group">
+        <button type="submit" class="btn-submit">Add to Cart</button>
+    </div>
+</form>
+
                     </div>
                 </div>
             @endforeach
@@ -123,7 +124,7 @@ function changeQuantity(id, change) {
 document.querySelectorAll('.size-options input[type="radio"]').forEach(radio => {
     radio.addEventListener('change', function() {
         const itemId = this.id.split('_')[1];
-        const newPrice = Math.round(parseFloat(this.dataset.price));
+        const newPrice = parseFloat(this.dataset.price);
         document.getElementById('price_display_' + itemId).textContent = '₱' + newPrice.toFixed(2);
         document.getElementById('price_input_' + itemId).value = newPrice;
     });
