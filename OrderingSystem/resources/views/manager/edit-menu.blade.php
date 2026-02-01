@@ -10,32 +10,62 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
+            {{-- FLASH MESSAGE --}}
+            @if(session('success'))
+                <div
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-init="setTimeout(() => show = false, 4000)"
+                    class="mb-4 px-4 py-3 rounded bg-green-100 border border-green-400 text-green-800"
+                >
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-init="setTimeout(() => show = false, 4000)"
+                    class="mb-4 px-4 py-3 rounded bg-red-100 border border-red-400 text-red-800"
+                >
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
 
                 {{-- PAGE TITLE --}}
-                <h1 class="text-2xl font-semibold mb-6">Edit Menu Items</h1>
+                <h1 class="text-2xl font-semibold mb-4">Edit Menu Items</h1>
 
-                {{-- FILTER + SEARCH --}}
+                {{-- CREATE BUTTON + CATEGORY FILTER + SEARCH --}}
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    {{-- CATEGORY FILTER --}}
-                    <form method="GET" action="{{ route('menu.manage') }}" class="flex items-center gap-3">
-                        <label for="type" class="font-semibold">Select Category:</label>
-                        <select name="type"
-                                id="type"
-                                class="border rounded px-3 py-2 w-64"
-                                onchange="this.form.submit()"
-                        >
-                            <option value="">All Categories</option>
-                            <option value="Appetizers" {{ request('type') == 'Appetizers' ? 'selected' : '' }}>Appetizers</option>
-                            <option value="Main Courses" {{ request('type') == 'Main Courses' ? 'selected' : '' }}>Main Courses</option>
-                            <option value="Desserts" {{ request('type') == 'Desserts' ? 'selected' : '' }}>Desserts</option>
-                            <option value="Snacks" {{ request('type') == 'Snacks' ? 'selected' : '' }}>Snacks</option>
-                            <option value="Side Dishes" {{ request('type') == 'Side Dishes' ? 'selected' : '' }}>Side Dishes</option>
-                            <option value="Beverages" {{ request('type') == 'Beverages' ? 'selected' : '' }}>Beverages</option>
-                        </select>
-                    </form>
 
-                    {{-- SEARCH --}}
+                    {{-- LEFT SIDE: Create button + dropdown together --}}
+                    <div class="flex items-center gap-1">
+                        <a href="{{ route('menu.create') }}"
+                           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                            Create Menu Item
+                        </a>
+
+                        <form method="GET" action="{{ route('menu.manage') }}">
+                            <label for="type" class="sr-only">Select Category</label>
+                            <select name="type"
+                                    id="type"
+                                    class="border rounded px-3 py-2 w-64"
+                                    onchange="this.form.submit()">
+                                <option value="">All Categories</option>
+                                <option value="Appetizer" {{ request('type') == 'Appetizer' ? 'selected' : '' }}>Appetizer</option>
+                                <option value="Main Course" {{ request('type') == 'Main Course' ? 'selected' : '' }}>Main Course</option>
+                                <option value="Dessert" {{ request('type') == 'Dessert' ? 'selected' : '' }}>Dessert</option>
+                                <option value="Snack" {{ request('type') == 'Snack' ? 'selected' : '' }}>Snack</option>
+                                <option value="Side Dish" {{ request('type') == 'Side Dish' ? 'selected' : '' }}>Side Dish</option>
+                                <option value="Beverage" {{ request('type') == 'Beverage' ? 'selected' : '' }}>Beverage</option>
+                            </select>
+                        </form>
+                    </div>
+
+                    {{-- RIGHT SIDE: SEARCH --}}
                     <form method="GET" action="{{ route('menu.manage') }}" class="flex items-center gap-2">
                         <input type="text" name="search"
                                value="{{ request('search') }}"
@@ -47,6 +77,7 @@
                             Search
                         </button>
                     </form>
+
                 </div>
 
                 {{-- MENU TABLE --}}
@@ -66,29 +97,29 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="border px-4 py-2">{{ $item->sub_category_id }}</td>
                                 <td class="border px-4 py-2">{{ $item->name }}</td>
-                                <td class="border px-4 py-2">{{ $item->item_type }}</td>
+                                <td class="border px-4 py-2">{{ $item->category }}</td>
                                 <td class="border px-4 py-2">₱{{ number_format($item->price, 2) }}</td>
                                 <td class="border px-4 py-2 truncate" title="{{ $item->description }}">
                                     {{ $item->description }}
                                 </td>
                                 <td class="border px-4 py-2 text-center">
-    <div class="flex justify-center space-x-2">
-        <a href="{{ route('menu.editItem', $item->id) }}"
-           class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
-           Edit
-        </a>
-        <form action="{{ route('menu.destroy', $item->id) }}"
-              method="POST"
-              onsubmit="return confirm('Are you sure you want to delete this item?');">
-            @csrf
-            @method('DELETE')
-            <button type="submit"
-                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                Delete
-            </button>
-        </form>
-    </div>
-</td>
+                                    <div class="flex justify-center space-x-2">
+                                        <a href="{{ route('menu.editItem', $item->id) }}"
+                                           class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">
+                                           Edit
+                                        </a>
+                                        <form action="{{ route('menu.destroy', $item->id) }}"
+                                              method="POST"
+                                              onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -106,4 +137,7 @@
             </div>
         </div>
     </div>
+
+    {{-- Alpine.js for flash message --}}
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </x-app-layout>

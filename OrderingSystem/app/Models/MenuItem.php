@@ -22,6 +22,7 @@ class MenuItem extends Model
         'image_path',
         'is_available',
         'item_type',
+        'category',
     ];
 
     public $timestamps = false;

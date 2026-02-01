@@ -2,7 +2,7 @@
     <div class="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
         <!-- Header -->
         <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-            <h1 class="text-2xl font-bold mb-6 text-gray-800">Edit Order Status</h1>
+            <h1 class="text-2xl font-bold mb-6 text-gray-800">Update Order Progress</h1>
 
             <!-- Order Summary Section -->
             <div class="mb-6 border border-gray-300 rounded-lg p-4 bg-gray-50">
@@ -15,7 +15,8 @@
                     <thead class="bg-gray-200 text-gray-700 text-sm">
                         <tr>
                             <th class="border px-2 py-1 text-left">Item Name</th>
-                            <th class="border px-2 py-1 text-center">Qty</th>
+                            <th class="border px-2 py-1 text-center">Quantity</th>
+                            <th class="border px-2 py-1 text-center">Payment Method</th>
                             <th class="border px-2 py-1 text-right">Subtotal</th>
                         </tr>
                     </thead>
@@ -30,6 +31,7 @@
                                 @endif
                             </td>
                             <td class="border px-2 py-1 text-center">{{ $item->quantity }}</td>
+                            <td class="border px-2 py-1 text-center">{{ $item->payment_method }}</td>
                             <td class="border px-2 py-1 text-right">₱{{ number_format($item->subtotal, 2) }}</td>
                         </tr>
                         @endforeach
@@ -47,12 +49,28 @@
                 @method('PUT')
 
                 <div class="mb-4">
-                    <label for="status" class="block text-gray-700 font-semibold mb-2">Status</label>
-                    <select name="status" id="status" class="w-full border-gray-300 rounded-lg px-3 py-2">
-                        <option value="Pending" {{ $orderItem->status == 'Pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="In Progress" {{ $orderItem->status == 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="Completed" {{ $orderItem->status == 'Completed' ? 'selected' : '' }}>Completed</option>
-                    </select>
+                    <label for="status" class="block text-gray-700 font-semibold mb-2"> Change Order Progress</label>
+
+                    <select name="status"
+    class="border rounded px-3 py-2 w-full"
+    required>
+
+    <option value="Pending" {{ $orderItem->status === 'Pending' ? 'selected' : '' }}>
+        Pending
+    </option>
+
+    <option value="In Progress" {{ $orderItem->status === 'In Progress' ? 'selected' : '' }}>
+        In Progress
+    </option>
+
+    <option value="Completed" {{ $orderItem->status === 'Completed' ? 'selected' : '' }}>
+        Completed
+    </option>
+</select>
+<p class="text-sm text-gray-500 mb-2">
+    This refers to food preparation, not payment status.
+</p>
+
                 </div>
 
                 <div class="flex justify-end space-x-4">

@@ -7,6 +7,7 @@ use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StaffOrderController;
+use App\Http\Controllers\CustomerController;
 
 // Redirect root
 Route::get('/', function () {
@@ -20,45 +21,31 @@ Route::middleware(['auth', 'role:manager'])->group(function () {
 
     Route::get('/homepage', fn () => view('homepage'))->name('homepage');
 
-    // ✅ User management (manager & staff)
+    // User management
     Route::resource('users', UserController::class)
         ->except(['create', 'store', 'show']);
 
-    // Menu management (Manager only)
-Route::prefix('menu')->name('menu.')->middleware(['auth', 'role:manager'])->group(function () {
+    // Menu management
+    Route::prefix('menu')->name('menu.')->group(function () {
+        Route::get('/check-sub-category/{id}', [MenuController::class, 'checkSubCategory'])->name('checkSubCategory');
+        Route::get('/manage', [MenuController::class, 'index'])->name('manage');
+        Route::get('/create', [MenuController::class, 'create'])->name('create');
+        Route::post('/store', [MenuController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [MenuController::class, 'editItem'])->name('editItem');
+        Route::put('/{id}', [MenuController::class, 'update'])->name('update');
+        Route::delete('/{id}', [MenuController::class, 'destroy'])->name('destroy');
+    });
 
-    // Check if sub-category exists (AJAX)
-    Route::get('/check-sub-category/{id}', [MenuController::class, 'checkSubCategory'])
-        ->name('checkSubCategory');
+    // Delete customer (outside menu prefix)
+    Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])
+        ->name('customers.destroy');
 
-    // Manage menu items page
-    Route::get('/manage', [MenuController::class, 'index'])
-        ->name('manage');
-
-    // Create menu item
-    Route::get('/create', [MenuController::class, 'create'])
-        ->name('create');
-    Route::post('/store', [MenuController::class, 'store'])
-        ->name('store');
-
-    // Edit menu item
-    Route::get('/{id}/edit', [MenuController::class, 'editItem'])
-        ->name('editItem'); // <-- this is the exact name your blade uses
-
-    // Update menu item
-    Route::put('/{id}', [MenuController::class, 'update'])
-        ->name('update');
-
-    // Delete menu item
-    Route::delete('/{id}', [MenuController::class, 'destroy'])
-        ->name('destroy');
-});
-
-    // Reports
+    // Sales & reports
     Route::get('/reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
     Route::get('/sales-report', [SalesReportController::class, 'index'])->name('sales.report');
     Route::get('/sales-report/pdf', [SalesReportController::class, 'downloadPDF'])->name('reports.sales.pdf');
-     });
+});
+
 
 
 // ================= STAFF ROUTES =================

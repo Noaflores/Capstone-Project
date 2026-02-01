@@ -46,13 +46,28 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="sub_category_id" class="block font-medium">Sub Category ID</label>
-                        <input type="number" id="sub_category_id" name="sub_category_id"
-                               min="1000" max="9999"
-                               value="{{ old('sub_category_id', $item->sub_category_id) }}"
-                               class="w-full border-gray-300 rounded-lg shadow-sm"
-                               placeholder="Enter 4-digit sub-category ID">
-                    </div>
+    <label for="sub_category_id" class="block font-medium">Sub Category ID</label>
+    <input type="number" id="sub_category_id" name="sub_category_id"
+           value="{{ old('sub_category_id', $item->sub_category_id) }}"
+           class="w-full border-gray-300 rounded-lg shadow-sm"
+           placeholder="Enter sub-category ID">
+</div>
+
+<div class="mb-4">
+    <label for="category" class="block font-medium">Category</label>
+    <select id="category" name="category"
+            class="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2">
+        <option value="">Select Category</option>
+        <option value="Appetizer" {{ old('category', $item->category) == 'Appetizer' ? 'selected' : '' }}>Appetizer</option>
+        <option value="Main Course" {{ old('category', $item->category) == 'Main Course' ? 'selected' : '' }}>Main Course</option>
+        <option value="Dessert" {{ old('category', $item->category) == 'Dessert' ? 'selected' : '' }}>Dessert</option>
+        <option value="Snack" {{ old('category', $item->category) == 'Snack' ? 'selected' : '' }}>Snack</option>
+        <option value="Side Dish" {{ old('category', $item->category) == 'Side Dish' ? 'selected' : '' }}>Side Dish</option>
+        <option value="Beverage" {{ old('category', $item->category) == 'Beverage' ? 'selected' : '' }}>Beverage</option>
+    </select>
+</div>
+
+
 
                     <div class="mb-4">
                         <label for="price" class="block font-medium">Price</label>
@@ -68,27 +83,33 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="item_type" class="block font-medium">Type</label>
-                        <select id="item_type" name="item_type"
-                                class="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2">
-                            <option value="Drink" {{ old('item_type', $item->item_type) == 'Drink' ? 'selected' : '' }}>Drink</option>
-                            <option value="Food" {{ old('item_type', $item->item_type) == 'Food' ? 'selected' : '' }}>Food</option>
-                            <option value="Dessert" {{ old('item_type', $item->item_type) == 'Dessert' ? 'selected' : '' }}>Dessert</option>
-                        </select>
-                    </div>
+    <label for="category" class="block font-medium">Category</label>
+    <select id="category" name="category"
+            class="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2">
+        <option value="">Select Category</option>
+        <option value="Appetizer" {{ old('category', $item->category) == 'Appetizer' ? 'selected' : '' }}>Appetizer</option>
+        <option value="Main Course" {{ old('category', $item->category) == 'Main Course' ? 'selected' : '' }}>Main Course</option>
+        <option value="Dessert" {{ old('category', $item->category) == 'Dessert' ? 'selected' : '' }}>Dessert</option>
+        <option value="Snack" {{ old('category', $item->category) == 'Snack' ? 'selected' : '' }}>Snack</option>
+        <option value="Side Dish" {{ old('category', $item->category) == 'Side Dish' ? 'selected' : '' }}>Side Dish</option>
+        <option value="Beverage" {{ old('category', $item->category) == 'Beverage' ? 'selected' : '' }}>Beverage</option>
+    </select>
+</div>
+
 
                     <!-- Current image + upload -->
                     <div class="mb-6">
                         <label class="block font-medium mb-2">Current Image</label>
 
                         @if($item->image_path)
-                            <img id="currentImage"
-                                 src="{{ asset('storage/' . $item->image_path) }}"
-                                 alt="Current image for {{ $item->name }}"
-                                 class="w-48 h-48 object-cover rounded-lg border mb-4">
-                        @else
-                            <p class="text-gray-500 italic mb-4">No image uploaded.</p>
-                        @endif
+    <img id="currentImage"
+         src="{{ asset('images/' . $item->image_path) }}"
+         alt="Current image for {{ $item->name }}"
+         class="w-48 h-48 object-cover rounded-lg border mb-4">
+@else
+    <p class="text-gray-500 italic mb-4">No image uploaded.</p>
+@endif
+
 
                         <label for="image" class="block font-medium">Change Image</label>
                         <input type="file" id="image" name="image"

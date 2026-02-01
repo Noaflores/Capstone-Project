@@ -143,25 +143,23 @@
                         <tbody>
                             @forelse ($customers as $customer)
                                 <tr class="hover:bg-gray-50">
-                                    <td class="border px-4 py-2 truncate" title="{{ $customer->Email }}">
-                                        {{ $customer->Email }}
+                                    <td class="border px-4 py-2 truncate" title="{{ $customer->email }}">
+                                        {{ $customer->email }}
                                     </td>
                                     <td class="border px-4 py-2">
                                         {{ substr($customer->contact_number ?? 'N/A', 0, 4)
                                            . str_repeat('*', max(strlen($customer->contact_number ?? '') - 4, 0)) }}
                                     </td>
                                     <td class="border px-4 py-2 text-center">
-                                        <form action="{{ route('users.destroy', $customer->customer_id) }}"
-                                              method="POST"
-                                              class="inline-block"
-                                              onsubmit="return confirm('Are you sure you want to remove this customer?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    class="bg-red-500 text-white px-3 py-1 text-sm rounded hover:bg-red-600">
-                                                Remove
-                                            </button>
-                                        </form>
+<form action="{{ route('customers.destroy', $customer->customer_id) }}" method="POST"
+      onsubmit="return confirm('Are you sure you want to remove this customer?');">
+    @csrf
+    @method('DELETE')
+    <button type="submit"
+            class="bg-red-500 text-white px-3 py-1 text-sm rounded hover:bg-red-600">
+        Remove
+    </button>
+</form>
                                     </td>
                                 </tr>
                             @empty

@@ -155,30 +155,30 @@
 
         <!-- Form for updating user profile information -->
         <form method="POST" action="{{ route('profile.update') }}" class="user-info-grid">
-            @csrf
-            @method('PUT') <!-- Method spoofing since HTML forms only support GET and POST -->
+    @csrf
+    @method('PUT')
 
-            <div class="info-label">First and Last Name:</div>
-            <div class="info-input-wrapper">
-                <input type="text" name="name" value="{{ old('name', $user->name) }}" required>
-            </div>
+    <div class="info-label">First and Last Name:</div>
+    <div class="info-input-wrapper">
+        <input type="text" name="name" value="{{ old('name', $user->first_name . ' ' . $user->last_name) }}" required>
+    </div>
 
-            <div class="info-label">Email:</div>
-            <div class="info-input-wrapper">
-                <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
-            </div>
+    <div class="info-label">Email:</div>
+    <div class="info-input-wrapper">
+        <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
+    </div>
 
-            <div class="info-label">Contact Number:</div>
-            <div class="info-input-wrapper">
-                <input type="text" name="contact_number" value="{{ old('contact_number', $user->contact_number) }}">
-            </div>
+    <div class="info-label">Contact Number:</div>
+    <div class="info-input-wrapper">
+        <input type="text" name="contact_number" value="{{ old('contact_number', $user->contact_number) }}">
+    </div>
 
-            <!-- Action buttons -->
-            <div class="button-group">
-                <a href="{{ route('profile') }}" class="action-button">Cancel</a>
-                <button type="submit" class="action-button">Change</button>
-            </div>
-        </form>
+    <div class="button-group">
+        <a href="{{ route('profile') }}" class="action-button">Cancel</a>
+        <button type="submit" class="action-button">Change</button>
+    </div>
+</form>
+
 
     </div>
 </div>

@@ -17,29 +17,30 @@
 
                     <!-- Back + Action buttons -->
                     <div class="flex justify-between items-center mb-6">
+                        <!-- Back button -->
                         <a href="{{ route('menu.manage') }}"
                            class="inline-block bg-gray-500 text-white px-4 py-2 rounded-full font-bold hover:bg-gray-600">
-                            ← Back to Menu List
+                            Back to Menu List
                         </a>
 
                         <div class="flex gap-4">
+                            <!-- Reset -->
                             <button type="reset" 
                                     class="bg-green-600 text-white px-6 py-2 rounded-full font-bold hover:bg-green-700"
                                     @click="resetForm()">
                                 Reset
                             </button>
 
-                            <button type="button" 
+                            <!-- Create -->
+                            <button type="button"
                                     class="bg-green-600 text-white px-6 py-2 rounded-full font-bold hover:bg-green-700"
-                                    @click="showModal = true"
-                                    :disabled="duplicate">
+                                    @click="showModal = true">
                                 Create
                             </button>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-6 items-start">
-
                         <!-- Left: Details -->
                         <div>
                             <!-- Name -->
@@ -56,18 +57,13 @@
                                        id="sub_category_id"
                                        name="sub_category_id"
                                        x-model="subId"
-                                       min="1000" max="9999"
+                                       min="1" max="999"
                                        class="w-full border p-2 rounded-md bg-gray-100"
-                                       placeholder="Enter 4-digit number"
-                                       required
-                                       @input="checkDuplicate()">
+                                       placeholder="Enter 3-digit numbers"
+                                       required>
 
                                 <p class="text-sm text-gray-500 mt-1">
-                                    Example 4-digit IDs: 1742=Hot Beverages, 4217=Cold Beverages, 5023=Coffee, 8931=Tea
-                                </p>
-
-                                <p class="text-sm text-red-600 mt-1" x-show="duplicate" x-transition>
-                                    ⚠️ This Sub Category ID already exists!
+                                    Example 3-digit IDs: 111=Hot Beverages, 112=Cold Beverages
                                 </p>
                             </div>
 
@@ -85,14 +81,18 @@
                                        class="w-full border p-2 rounded-md bg-gray-100" required>
                             </div>
 
-                            <!-- Item Type -->
+                            <!-- Category -->
                             <div class="mb-4">
-                                <label for="item_type" class="block font-bold mb-2">Item Type</label>
-                                <select name="item_type" id="item_type" class="w-full border p-2 rounded-md bg-gray-100" required>
-                                    <option value="">-- Select Type --</option>
-                                    <option value="Drink">Drink</option>
-                                    <option value="Food">Food</option>
+                                <label for="category" class="block font-bold mb-2">Category</label>
+                                <select name="category" id="category" 
+                                        class="w-full border p-2 rounded-md bg-gray-100" required>
+                                    <option value=""> Select Category </option>
+                                    <option value="Appetizer">Appetizer</option>
+                                    <option value="Main Course">Main Course</option>
                                     <option value="Dessert">Dessert</option>
+                                    <option value="Snack">Snack</option>
+                                    <option value="Side Dish">Side Dish</option>
+                                    <option value="Beverage">Beverage</option>
                                 </select>
                             </div>
                         </div>
@@ -122,24 +122,32 @@
                     </div>
 
                     <!-- Confirmation Modal -->
-                    <div x-show="showModal" 
+                    <div x-show="showModal"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
                          class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+
                         <div class="bg-white p-8 rounded-2xl shadow-2xl w-[450px] max-w-[95%] text-center border border-gray-300">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">
                                 Do you wish to save your changes?
                             </h2>
 
                             <div class="grid grid-cols-2 gap-6">
+                                <!-- Cancel -->
                                 <button type="button" 
                                         @click="showModal = false"
                                         class="w-full py-3 rounded-lg font-bold text-white bg-red-600 hover:bg-red-700 shadow-lg transition">
                                     No
                                 </button>
 
-                                <button type="button" 
-                                        @click="$refs.menuForm.submit()"
-                                        class="w-full py-3 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-lg transition"
-                                        :disabled="duplicate">
+                                <!-- Confirm / Submit -->
+                                <button type="submit"
+                                        form="menuForm"
+                                        class="w-full py-3 rounded-lg font-bold text-white bg-green-600 hover:bg-green-700 shadow-lg transition">
                                     Yes
                                 </button>
                             </div>
@@ -151,14 +159,15 @@
         </div>
     </div>
 
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
     <script>
         function menuForm() {
             return {
                 showModal: false,
                 imagePreview: null,
                 subId: '',
-                duplicate: false,
-                existingIds: @json($existingSubCategoryIds ?? []),
 
                 previewImage(event) {
                     const file = event.target.files[0];
@@ -171,15 +180,9 @@
                     }
                 },
 
-                checkDuplicate() {
-                    const id = parseInt(this.subId);
-                    this.duplicate = this.existingIds.includes(id);
-                },
-
                 resetForm() {
                     this.subId = '';
                     this.imagePreview = null;
-                    this.duplicate = false;
                     this.$refs.menuForm.reset();
                 }
             }

@@ -19,10 +19,9 @@ class Customer extends Authenticatable
         'customer_id',
         'first_name',
         'last_name',
-        'Email',
+        'email',
         'contact_number',
         'password',
-        // Add gcash_name and gcash_number if needed
         'gcash_name',
         'gcash_number',
     ];
@@ -32,7 +31,7 @@ class Customer extends Authenticatable
      */
     public function getAuthIdentifierName()
     {
-        return 'Email';
+        return 'email';
     }
 
     /**
