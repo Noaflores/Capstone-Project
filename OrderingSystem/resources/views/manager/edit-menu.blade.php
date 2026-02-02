@@ -1,12 +1,6 @@
 <x-app-layout>
     @section('title', 'Edit Menu')
 
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Edit Menu Items') }}
-        </h2>
-    </x-slot>
-
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
@@ -35,8 +29,23 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
 
-                {{-- PAGE TITLE --}}
-                <h1 class="text-2xl font-semibold mb-4">Edit Menu Items</h1>
+                {{-- BACK TO HOME --}}
+<a href="{{ route('homepage') }}"
+   class="inline-flex items-center gap-2 mb-4
+          px-4 py-2
+          border border-gray-400
+          rounded-md
+          bg-gray-200
+          text-sm font-medium text-gray-800
+          hover:bg-gray-300 hover:border-gray-500
+          transition">
+    ← Return to Homepage
+</a>
+
+
+{{-- PAGE TITLE --}}
+<h1 class="text-2xl font-semibold mb-4">Edit Menu Items</h1>
+
 
                 {{-- CREATE BUTTON + CATEGORY FILTER + SEARCH --}}
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">

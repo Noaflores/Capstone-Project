@@ -8,4 +8,14 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                // Force predictable filenames
+                entryFileNames: 'assets/app.js',
+                chunkFileNames: 'assets/app.js',
+                assetFileNames: 'assets/app.css',
+            },
+        },
+    },
 });
